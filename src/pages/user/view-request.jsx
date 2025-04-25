@@ -1,12 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
-import logo from "../assets/CCSGadgetHub1.png";
+import logo from "../../assets/CCSGadgetHub1.png";
 
 const ViewRequest = () => {
   const location = useLocation();
   const { id } = useParams();
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
-  // Dummy data matching the my-requests page
   const dummyRequests = [
     {
       id: "1",
@@ -45,6 +45,15 @@ const ViewRequest = () => {
 
   const requestData = dummyRequests.find(req => req.id === id);
 
+  const handleCancel = () => {
+    setShowCancelModal(true);
+  };
+
+  const confirmCancel = () => {
+    setShowCancelModal(false);
+    alert("Request has been canceled.");
+  };
+
   if (!requestData) {
     return (
       <div className="dashboard-container">
@@ -56,35 +65,26 @@ const ViewRequest = () => {
 
   return (
     <div className="items-page">
-      {/* Navbar */}
       <div className="navbar">
         <img src={logo} alt="CCS Gadget Hub Logo" />
         <nav>
-          {[
-            { label: "Dashboard", to: "/dashboard" },
-            { label: "Items", to: "/items" },
-            { label: "My Requests", to: "/my-requests" },
-            { label: "Activity Log", to: "/activity-log" },
-            { label: "Profile", to: "/profile" },
-          ].map((link) => (
+          {["Dashboard", "Items", "My Requests", "Activity Log", "Profile"].map((label, i) => (
             <Link
-              key={link.to}
-              to={link.to}
-              className={location.pathname === link.to ? "navbar-link active-link" : "navbar-link"}
+              key={label}
+              to={`/${label.toLowerCase().replace(" ", "-")}`}
+              className={location.pathname === `/${label.toLowerCase().replace(" ", "-")}` ? "navbar-link active-link" : "navbar-link"}
             >
-              {link.label}
+              {label}
             </Link>
           ))}
         </nav>
         <div style={{ marginLeft: "auto" }}>
-          <Link to="/login" className="logout-link">Log Out</Link>
+          <Link to="/" className="logout-link">Log Out</Link>
         </div>
       </div>
 
-      {/* Content */}
       <div className="dashboard-container">
         <Link to="/my-requests" className="back-arrow">←</Link>
-
         <h2 className="featured-title">Request Summary</h2>
 
         <div className="request-summary-box">
@@ -96,6 +96,23 @@ const ViewRequest = () => {
           <p><strong>Reason for Borrowing:</strong> {requestData.reason}</p>
           <p><strong>Remarks:</strong> {requestData.remarks}</p>
         </div>
+
+        {requestData.status.toLowerCase() === "pending" && (
+          <>
+            <button className="cancel-btn" onClick={handleCancel}>Cancel Request</button>
+            {showCancelModal && (
+              <div className="modal-overlay">
+                <div className="modal-box">
+                  <p>Are you sure you want to cancel this request?</p>
+                  <div className="modal-actions">
+                    <button className="yes-btn" onClick={confirmCancel}>Yes</button>
+                    <button className="no-btn" onClick={() => setShowCancelModal(false)}>No</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

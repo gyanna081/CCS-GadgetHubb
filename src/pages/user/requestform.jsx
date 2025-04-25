@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
-import logo from "../assets/CCSGadgetHub1.png";
+import logo from "../../assets/CCSGadgetHub1.png";
 
 const navLinks = [
-  { label: "Dashboard", to: "/dashboard" },
-  { label: "Items", to: "/items" },
+  { label: "Dashboard", to: "/userdashboard" },
+  { label: "Items", to: "/useritems" },
   { label: "My Requests", to: "/my-requests" },
   { label: "Activity Log", to: "/activity-log" },
-  { label: "Profile", to: "/profile" },
+  { label: "Profile", to: "/userprofile" },
 ];
 
 const RequestForm = () => {
@@ -68,14 +68,14 @@ const RequestForm = () => {
           ))}
         </nav>
         <div style={{ marginLeft: "auto" }}>
-          <Link to="/login" className="logout-link">Log Out</Link>
+          <Link to="/" className="logout-link">Log Out</Link>
         </div>
       </div>
 
       {/* Form Section */}
       <div className="request-form-page">
         <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto' }}>
-          <Link to="/items" className="back-arrow">←</Link>
+          <Link to="/useritems" className="back-arrow">←</Link>
         </div>
 
         <h2 className="request-form-title">Request Form</h2>
@@ -196,7 +196,7 @@ const RequestForm = () => {
               Check the status in the <strong>"My Requests"</strong> section.
             </p>
             <div style={{ textAlign: "center", marginTop: "20px" }}>
-              <Link to="/items" className="back-link">Back to Items Page</Link>
+              <Link to="/useritems" className="back-link">Back to Items Page</Link>
             </div>
           </div>
         </div>

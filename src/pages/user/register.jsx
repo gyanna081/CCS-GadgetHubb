@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { auth } from "../firebaseconfig";
+import { auth } from "../../firebaseconfig";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
-import logo from "../assets/CCSGadgetHub.png";
+import logo from "../../assets/CCSGadgetHub1.png";
 
 const Register = () => {
   const [firstName, setFirstName] = useState("");

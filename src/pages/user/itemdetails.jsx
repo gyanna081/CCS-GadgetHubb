@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
-import logo from "../assets/CCSGadgetHub1.png";
+import logo from "../../assets/CCSGadgetHub1.png";
 
 const navLinks = [
-  { label: "Dashboard", to: "/dashboard" },
-  { label: "Items", to: "/items" },
+  { label: "Dashboard", to: "/userdashboard" },
+  { label: "Items", to: "/useritems" },
   { label: "My Requests", to: "/my-requests" },
   { label: "Activity Log", to: "/activity-log" },
-  { label: "Profile", to: "/profile" },
+  { label: "Profile", to: "/userprofile" },
 ];
 
 const ItemDetails = () => {
@@ -70,14 +70,14 @@ const ItemDetails = () => {
           ))}
         </nav>
         <div style={{ marginLeft: "auto" }}>
-          <Link to="/login" className="logout-link">Log Out</Link>
+          <Link to="/" className="logout-link">Log Out</Link>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="item-details-section">
         {/* Back Arrow */}
-        <Link to="/items" className="back-arrow">&#8592;</Link>
+        <Link to="/useritems" className="back-arrow">&#8592;</Link>
 
         {/* Image Carousel */}
         <div className="carousel-wrapper">

@@ -1,13 +1,13 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import logo from "../assets/CCSGadgetHub1.png";
+import logo from "../../assets/CCSGadgetHub1.png";
 
 const navLinks = [
-  { label: "Dashboard", to: "/dashboard" },
-  { label: "Items", to: "/items" },
+  { label: "Dashboard", to: "/userdashboard" },
+  { label: "Items", to: "/useritems" },
   { label: "My Requests", to: "/my-requests" },
   { label: "Activity Log", to: "/activity-log" },
-  { label: "Profile", to: "/profile" },
+  { label: "Profile", to: "/userprofile" },
 ];
 
 const Profile = () => {
@@ -34,7 +34,7 @@ const Profile = () => {
           ))}
         </nav>
         <div style={{ marginLeft: "auto" }}>
-          <Link to="/login" className="logout-link">
+          <Link to="/" className="logout-link">
             Log Out
           </Link>
         </div>
@@ -42,8 +42,6 @@ const Profile = () => {
 
       {/* Profile Content */}
       <div className="profile-page">
-        <Link to="/dashboard" className="back-arrow">←</Link>
-
         <div className="profile-container">
           {/* Left: Image */}
           <div className="profile-image">Profile Image</div>
@@ -51,7 +49,7 @@ const Profile = () => {
           {/* Right: Info */}
           <div className="profile-info">
             <div className="profile-edit">
-              <Link to="/editprofile">
+              <Link to="/usereditprofile">
                 <button className="edit-btn">Edit Profile</button>
               </Link>
             </div>

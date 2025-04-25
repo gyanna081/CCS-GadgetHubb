@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import logo from "../assets/CCSGadgetHub1.png";
+import logo from "../../assets/CCSGadgetHub1.png";
 
 const navLinks = [
   { label: "Dashboard", to: "/dashboard" },
@@ -20,13 +20,13 @@ const EditProfile = () => {
   const [yearLevel, setYearLevel] = useState("4th Year");
 
   const handleCancel = () => {
-    navigate("/profile");
+    navigate("/userprofile");
   };
 
   const handleSave = (e) => {
     e.preventDefault();
     // logic to update profile here
-    navigate("/profile");
+    navigate("/userprofile");
   };
 
   return (
@@ -48,13 +48,13 @@ const EditProfile = () => {
           ))}
         </nav>
         <div style={{ marginLeft: "auto" }}>
-          <Link to="/login" className="logout-link">Log Out</Link>
+          <Link to="/" className="logout-link">Log Out</Link>
         </div>
       </div>
 
       {/* Content */}
       <div className="edit-profile-page">
-        <Link to="/profile" className="back-arrow">←</Link>
+        <Link to="/userprofile" className="back-arrow">←</Link>
 
         <div className="edit-profile-container">
           {/* Left: Form */}

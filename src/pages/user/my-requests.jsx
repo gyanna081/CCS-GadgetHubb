@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import logo from "../assets/CCSGadgetHub1.png";
+import logo from "../../assets/CCSGadgetHub1.png";
 
 const MyRequests = () => {
   const location = useLocation();
@@ -46,11 +47,11 @@ const MyRequests = () => {
         <img src={logo} alt="CCS Gadget Hub Logo" />
         <nav>
           {[
-            { label: "Dashboard", to: "/dashboard" },
-            { label: "Items", to: "/items" },
+            { label: "Dashboard", to: "/userdashboard" },
+            { label: "Items", to: "/useritems" },
             { label: "My Requests", to: "/my-requests" },
             { label: "Activity Log", to: "/activity-log" },
-            { label: "Profile", to: "/profile" },
+            { label: "Profile", to: "/userprofile" },
           ].map((link) => (
             <Link
               key={link.to}
@@ -62,7 +63,7 @@ const MyRequests = () => {
           ))}
         </nav>
         <div style={{ marginLeft: "auto" }}>
-          <Link to="/login" className="logout-link">Log Out</Link>
+          <Link to="/" className="logout-link">Log Out</Link>
         </div>
       </div>
 

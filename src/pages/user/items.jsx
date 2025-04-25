@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import logo from "../assets/CCSGadgetHub1.png";
+import logo from "../../assets/CCSGadgetHub1.png";
 
 const Items = () => {
   const [items, setItems] = useState([]);
@@ -23,11 +23,11 @@ const Items = () => {
   }, []);
 
   const navLinks = [
-    { label: "Dashboard", to: "/dashboard" },
-    { label: "Items", to: "/items" },
+    { label: "Dashboard", to: "/userdashboard" },
+    { label: "Items", to: "/useritems" },
     { label: "My Requests", to: "/my-requests" },
     { label: "Activity Log", to: "/activity-log" },
-    { label: "Profile", to: "/profile" },
+    { label: "Profile", to: "/userprofile" },
   ];
 
   const filteredItems = items.filter((item) => {
@@ -63,7 +63,7 @@ const Items = () => {
           ))}
         </nav>
         <div style={{ marginLeft: "auto" }}>
-          <Link to="/login" className="logout-link">Log Out</Link>
+          <Link to="/" className="logout-link">Log Out</Link>
         </div>
       </div>
 
@@ -127,7 +127,7 @@ const Items = () => {
                 {item.available ? "Available" : "Not Available"}
               </p>
               <p className="item-rating">⭐ {item.rating}</p>
-              <Link to={`/item-details/${item.id}`} className="item-details-btn">
+              <Link to={`/useritem-details/${item.id}`} className="item-details-btn">
                 View Details
               </Link>
             </div>

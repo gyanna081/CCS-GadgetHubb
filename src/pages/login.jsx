@@ -3,6 +3,8 @@ import { auth, provider } from "../firebaseconfig";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/CCSGadgetHub.png";
+import "../index.css";
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,7 +17,7 @@ const Login = () => {
     setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard");
+      navigate("/userdashboard");
     } catch (err) {
       setError(err.message || "Invalid email or password");
     }
@@ -24,7 +26,7 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     try {
       await signInWithPopup(auth, provider);
-      navigate("/dashboard");
+      navigate("/userdashboard");
     } catch (err) {
       setError(err.message || "Google Sign-In failed");
     }
