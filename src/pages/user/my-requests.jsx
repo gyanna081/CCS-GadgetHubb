@@ -50,7 +50,6 @@ const MyRequests = () => {
             { label: "Dashboard", to: "/userdashboard" },
             { label: "Items", to: "/useritems" },
             { label: "My Requests", to: "/my-requests" },
-            { label: "Activity Log", to: "/activity-log" },
             { label: "Profile", to: "/userprofile" },
           ].map((link) => (
             <Link

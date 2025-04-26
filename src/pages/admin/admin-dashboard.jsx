@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/CCSGadgetHub1.png";
+import "../../admin.css";
 
 const AdminDashboard = () => {
   const location = useLocation();

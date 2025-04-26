@@ -6,7 +6,6 @@ const navLinks = [
   { label: "Dashboard", to: "/dashboard" },
   { label: "Items", to: "/items" },
   { label: "My Requests", to: "/my-requests" },
-  { label: "Activity Log", to: "/activity-log" },
   { label: "Profile", to: "/profile" },
 ];
 

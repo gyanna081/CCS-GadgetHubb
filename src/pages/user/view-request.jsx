@@ -17,7 +17,6 @@ const ViewRequest = () => {
       toTime: "12:00 PM",
       returnDate: "",
       reason: "Research use for final project",
-      remarks: "-"
     },
     {
       id: "2",
@@ -28,7 +27,6 @@ const ViewRequest = () => {
       toTime: "05:00 PM",
       returnDate: "",
       reason: "Midterm presentation recording",
-      remarks: "-"
     },
     {
       id: "3",
@@ -39,7 +37,6 @@ const ViewRequest = () => {
       toTime: "04:00 PM",
       returnDate: "2025-04-06 10:00 AM",
       reason: "Final defense setup",
-      remarks: "Returned complete and in good condition"
     }
   ];
 
@@ -68,7 +65,7 @@ const ViewRequest = () => {
       <div className="navbar">
         <img src={logo} alt="CCS Gadget Hub Logo" />
         <nav>
-          {["Dashboard", "Items", "My Requests", "Activity Log", "Profile"].map((label, i) => (
+          {["Dashboard", "Items", "My Requests", "Profile"].map((label, i) => (
             <Link
               key={label}
               to={`/${label.toLowerCase().replace(" ", "-")}`}
@@ -94,7 +91,6 @@ const ViewRequest = () => {
           <p><strong>Duration:</strong> {requestData.fromTime} - {requestData.toTime}</p>
           <p><strong>Returned Date & Time:</strong> {requestData.status.toLowerCase() === "returned" ? requestData.returnDate : "-"}</p>
           <p><strong>Reason for Borrowing:</strong> {requestData.reason}</p>
-          <p><strong>Remarks:</strong> {requestData.remarks}</p>
         </div>
 
         {requestData.status.toLowerCase() === "pending" && (

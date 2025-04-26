@@ -12,11 +12,16 @@ import Profile from "./pages/user/profile";
 import EditProfile from "./pages/user/editprofile";
 import MyRequests from "./pages/user/my-requests";
 import ViewRequest from "./pages/user/view-request";
-import ActivityLog from "./pages/user/activity-log";
 
 // Admin pages
 
 import AdminDashboard from "./pages/admin/admin-dashboard";
+import ManageItems from "./pages/admin/admin-items";
+import AddItem from "./pages/admin/add-item";
+import ViewItem from "./pages/admin/view-item";
+import EditItem from "./pages/admin/edit-item";
+import Requests from "./pages/admin/admin-requests";
+import ReviewRequest from "./pages/admin/review-request";
 
 
 
@@ -36,10 +41,16 @@ function App() {
         <Route path="/usereditprofile" element={<EditProfile />} />
         <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/view-request/:id" element={<ViewRequest />} />
-        <Route path="/activity-log" element={<ActivityLog />} />
 
         {/* Admin Routes */}
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/admin-items" element={<ManageItems />} />
+        <Route path="/add-item" element={<AddItem />} />
+        <Route path="/view-item/:id" element={<ViewItem />} />
+        <Route path="/edit-item/:id" element={<EditItem />} />
+        <Route path="/admin-requests" element={<Requests />} />
+        <Route path="/review-request/:id" element={<ReviewRequest />} />
+
 
       </Routes>
     </Router>
