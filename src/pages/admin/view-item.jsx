@@ -67,7 +67,7 @@ const AdminViewItem = () => {
           <p><strong>Description:</strong> {item.description}</p>
           <p><strong>Condition:</strong> {item.condition}</p>
           <p><strong>Status:</strong> 
-            <span className={`status-badge ${item.status.toLowerCase()}`}>
+            <span className={`status ${item.status.toLowerCase()}`}>
               {item.status}
             </span>
           </p>

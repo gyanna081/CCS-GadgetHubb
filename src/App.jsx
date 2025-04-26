@@ -22,6 +22,7 @@ import ViewItem from "./pages/admin/view-item";
 import EditItem from "./pages/admin/edit-item";
 import Requests from "./pages/admin/admin-requests";
 import ReviewRequest from "./pages/admin/review-request";
+import AdminViewRequest from "./pages/admin/admin-view-request"; 
 
 
 
@@ -50,6 +51,8 @@ function App() {
         <Route path="/edit-item/:id" element={<EditItem />} />
         <Route path="/admin-requests" element={<Requests />} />
         <Route path="/review-request/:id" element={<ReviewRequest />} />
+        <Route path="/admin-view-request/:id" element={<AdminViewRequest />} />
+        
 
 
       </Routes>

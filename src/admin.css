@@ -139,6 +139,14 @@
   .deny-btn:hover {
     background-color: #991f1f;
   }
+
+  .section-header {
+    margin-top: 25px;
+    font-size: 20px;
+    color: #C94B28; /* Maroon for consistency */
+    margin-bottom: 10px;
+  }
+  
   
   /* Manage Items Page (Admin) */
 .admin-manage-items-page {
@@ -562,16 +570,21 @@
   background-color: var(--button-hover);
 }
 
+.status {
+  color: #E26901;
+  font-weight: 600;
+  padding: 5px
+}
+
 .status-badge {
   display: inline-block;
   margin-top: 8px;
   padding: 6px 12px;
   border-radius: 12px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   text-transform: capitalize;
-  background-color: #eee;
-  color: #333;
+  color: #E26901;
 }
 
 .status-badge.pending {
@@ -663,4 +676,34 @@
 
 .deny-btn:hover {
   background-color: #c82333;
+}
+
+/* Admin View Request Page */
+.admin-view-request-details-box {
+  background: white;
+  padding: 30px;
+  margin-top: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 600px;
+}
+
+.admin-view-back-arrow {
+  font-size: 24px;
+  color: #C94B28;
+  margin-bottom: 10px;
+  margin-left: 5px;
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.section-header {
+  margin-top: 25px;
+  font-size: 20px;
+  color: #C94B28; /* Maroon theme */
+  margin-bottom: 10px;
 }

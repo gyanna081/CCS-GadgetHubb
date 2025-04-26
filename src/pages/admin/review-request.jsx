@@ -11,9 +11,10 @@ const AdminRequestReview = () => {
     id,
     borrower: "Jane Doe",
     item: "Dell Laptop",
-    requestDate: "Apr 22, 2025",
-    time: "9:00 AM - 3:00 PM",
-    reason: "Project Presentation",
+    requestCreatedDate: "April 18, 2025", // Added request creation date
+    borrowDate: "April 22, 2025",          // Adjusted field names
+    borrowTime: "9:00 AM - 3:00 PM",
+    reason: "Project Presentation for final grade submission.",
     status: "Pending",
   };
 
@@ -58,14 +59,26 @@ const AdminRequestReview = () => {
         <Link to="/admin-requests" className="back-arrow">←</Link>
 
         <div className="request-details-box">
-          <h2>Request Details</h2>
-          <p><strong>Borrower:</strong> {requestDetails.borrower}</p>
-          <p><strong>Item:</strong> {requestDetails.item}</p>
-          <p><strong>Request Date:</strong> {requestDetails.requestDate}</p>
-          <p><strong>Time:</strong> {requestDetails.time}</p>
-          <p><strong>Reason:</strong> {requestDetails.reason}</p>
-          <p><strong>Status:</strong> {requestDetails.status}</p>
+          <h2>Review Request Details</h2>
 
+          {/* Request Timeline */}
+          <h3 className="section-header">📅 Request Timeline</h3>
+          <p><strong>Date Request Was Created:</strong> {requestDetails.requestCreatedDate}</p>
+
+          {/* Borrowing Schedule */}
+          <h3 className="section-header">📦 Borrowing Schedule</h3>
+          <p><strong>Scheduled Borrow Date:</strong> {requestDetails.borrowDate}</p>
+          <p><strong>Scheduled Time Slot:</strong> {requestDetails.borrowTime}</p>
+
+          {/* Request Information */}
+          <h3 className="section-header">📝 Request Information</h3>
+          <p><strong>Borrower Name:</strong> {requestDetails.borrower}</p>
+          <p><strong>Item Requested:</strong> {requestDetails.item}</p>
+          <p><strong>Reason for Borrowing:</strong> {requestDetails.reason}</p>
+
+          <p><strong>Current Status:</strong> {requestDetails.status}</p>
+
+          {/* Approve and Deny Buttons */}
           <div className="request-action-btns">
             <button className="approve-btn" onClick={handleApprove}>Approve</button>
             <button className="deny-btn" onClick={handleDeny}>Deny</button>

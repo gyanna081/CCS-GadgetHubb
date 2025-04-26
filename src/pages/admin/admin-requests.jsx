@@ -34,7 +34,7 @@ const AdminRequests = () => {
       {
         id: 3,
         borrower: "Emily Brown",
-        item: "Tablet",
+        item: "Huawei Matebook D15",
         requestDate: "2025-04-20",
         requestTime: "11:00 AM - 4:00 PM",
         status: "Denied",
@@ -116,21 +116,33 @@ const AdminRequests = () => {
         <div className="admin-requests-grid">
           {filteredRequests.length > 0 ? (
             filteredRequests.map((req) => (
-              <div key={req.id} className="admin-request-card fixed-card-width">
+              <div
+                key={req.id}
+                className="admin-request-card fixed-card-width"
+                onClick={() => {
+                  if (req.status === "Pending") return; // Pending = no card click
+                  navigate(`/admin-view-request/${req.id}`); // ✅ Correct redirection for Approved/Denied
+                }}
+                style={{ cursor: req.status !== "Pending" ? "pointer" : "default" }}
+              >
                 <h3>{req.borrower}</h3>
                 <p><strong>Item:</strong> {req.item}</p>
-                <p><strong>Request Date:</strong> {req.requestDate} ({req.requestTime})</p>
-                {req.status !== "Pending" && (
-                  <p><strong>{req.status} Date:</strong> {req.decisionDate}</p>
-                )}
+                <p><strong>Time Slot:</strong> ({req.requestTime})</p>
+                <p><strong>Date:</strong> {req.requestDate}</p>
                 <p className={`status-badge ${req.status.toLowerCase()}`}>{req.status}</p>
 
-                <button
-                  className="review-btn"
-                  onClick={() => navigate(`/review-request/${req.id}`)}
-                >
-                  Review Request
-                </button>
+                {/* Show Review Button only if Pending */}
+                {req.status === "Pending" && (
+                  <button
+                    className="review-btn"
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevent card click
+                      navigate(`/review-request/${req.id}`);
+                    }}
+                  >
+                    Review Request
+                  </button>
+                )}
               </div>
             ))
           ) : (
