@@ -22,20 +22,14 @@ const Profile = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={
-                location.pathname === link.to
-                  ? "navbar-link active-link"
-                  : "navbar-link"
-              }
+              className={location.pathname === link.to ? "navbar-link active-link" : "navbar-link"}
             >
               {link.label}
             </Link>
           ))}
         </nav>
         <div style={{ marginLeft: "auto" }}>
-          <Link to="/" className="logout-link">
-            Log Out
-          </Link>
+          <Link to="/" className="logout-link">Log Out</Link>
         </div>
       </div>
 
@@ -57,10 +51,6 @@ const Profile = () => {
             <p>Student</p>
 
             <div className="profile-grid">
-              <div>
-                <p className="profile-label">Student No.</p>
-                <p><strong>xx-xxxxx-xxx</strong></p>
-              </div>
               <div>
                 <p className="profile-label">Course</p>
                 <p><strong>BSIT</strong></p>

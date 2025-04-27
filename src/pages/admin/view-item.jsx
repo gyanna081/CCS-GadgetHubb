@@ -66,9 +66,9 @@ const AdminViewItem = () => {
           <h2>{item.name}</h2>
           <p><strong>Description:</strong> {item.description}</p>
           <p><strong>Condition:</strong> {item.condition}</p>
-          <p><strong>Status:</strong> 
+          <p><strong>Status:</strong>
             <span className={`status ${item.status.toLowerCase()}`}>
-              {item.status}
+              {item.status === "Borrowed" ? "Not Available" : item.status}
             </span>
           </p>
         </div>

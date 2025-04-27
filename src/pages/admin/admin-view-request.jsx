@@ -88,7 +88,7 @@ const AdminViewRequest = () => {
                     <h2>Request Details</h2>
 
                     {/* Request Timeline */}
-                    <h3 className="section-header">📅 Request Timeline</h3>
+                    <h3 className="section-header">Request Timeline</h3>
                     <p><strong>Date Request Was Created:</strong> {requestData.requestCreatedDate}</p>
                     {(requestData.status === "Approved" || requestData.status === "Denied") && (
                         <p><strong>
@@ -97,12 +97,12 @@ const AdminViewRequest = () => {
                     )}
 
                     {/* Borrowing Schedule */}
-                    <h3 className="section-header">📦 Borrowing Schedule</h3>
+                    <h3 className="section-header">Borrowing Schedule</h3>
                     <p><strong>Scheduled Borrow Date:</strong> {requestData.borrowDate}</p>
                     <p><strong>Scheduled Time Slot:</strong> {requestData.borrowTime}</p>
 
                     {/* Request Information */}
-                    <h3 className="section-header">📝 Request Information</h3>
+                    <h3 className="section-header">Request Information</h3>
                     <p><strong>Borrower Name:</strong> {requestData.borrower}</p>
                     <p><strong>Item Requested:</strong> {requestData.item}</p>
                     <p><strong>Reason for Borrowing:</strong> {requestData.reason}</p>

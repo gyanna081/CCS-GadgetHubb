@@ -3,10 +3,10 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/CCSGadgetHub1.png";
 
 const navLinks = [
-  { label: "Dashboard", to: "/dashboard" },
-  { label: "Items", to: "/items" },
+  { label: "Dashboard", to: "/userdashboard" },
+  { label: "Items", to: "/useritems" },
   { label: "My Requests", to: "/my-requests" },
-  { label: "Profile", to: "/profile" },
+  { label: "Profile", to: "/userprofile" },
 ];
 
 const EditProfile = () => {
@@ -38,9 +38,7 @@ const EditProfile = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={
-                location.pathname === link.to ? "navbar-link active-link" : "navbar-link"
-              }
+              className={location.pathname === link.to ? "navbar-link active-link" : "navbar-link"}
             >
               {link.label}
             </Link>
@@ -68,7 +66,6 @@ const EditProfile = () => {
               <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} />
             </div>
 
-            <p style={{ margin: "10px 0 0", fontWeight: "bold" }}>xx-xxxxx-xxx</p>
             <p style={{ marginBottom: "20px" }}>micaella.obeso@cit.edu</p>
 
             <div className="input-row">
@@ -90,7 +87,7 @@ const EditProfile = () => {
             </div>
 
             <div className="edit-btn-row">
-              <button type="button" className="cancel-btn" onClick={handleCancel}>Cancel</button>
+              <Link to="/userprofile" className="cancel-link">Cancel</Link>
               <button type="submit" className="edit-save-btn">Save</button>
             </div>
           </form>

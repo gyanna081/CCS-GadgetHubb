@@ -62,16 +62,16 @@ const AdminRequestReview = () => {
           <h2>Review Request Details</h2>
 
           {/* Request Timeline */}
-          <h3 className="section-header">📅 Request Timeline</h3>
+          <h3 className="section-header">Request Timeline</h3>
           <p><strong>Date Request Was Created:</strong> {requestDetails.requestCreatedDate}</p>
 
           {/* Borrowing Schedule */}
-          <h3 className="section-header">📦 Borrowing Schedule</h3>
+          <h3 className="section-header">Borrowing Schedule</h3>
           <p><strong>Scheduled Borrow Date:</strong> {requestDetails.borrowDate}</p>
           <p><strong>Scheduled Time Slot:</strong> {requestDetails.borrowTime}</p>
 
           {/* Request Information */}
-          <h3 className="section-header">📝 Request Information</h3>
+          <h3 className="section-header">Request Information</h3>
           <p><strong>Borrower Name:</strong> {requestDetails.borrower}</p>
           <p><strong>Item Requested:</strong> {requestDetails.item}</p>
           <p><strong>Reason for Borrowing:</strong> {requestDetails.reason}</p>

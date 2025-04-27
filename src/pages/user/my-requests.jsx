@@ -7,7 +7,7 @@ const MyRequests = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("pending");
   const [requests, setRequests] = useState([]);
 
   useEffect(() => {
@@ -78,11 +78,11 @@ const MyRequests = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="all">All</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
             <option value="returned">Returned</option>
             <option value="denied">Denied</option>
+            <option value="all">All</option>
           </select>
         </div>
 

@@ -17,6 +17,9 @@ const AdminManageItems = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [items, setItems] = useState([]);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+
   useEffect(() => {
     const dummyItems = [
       { id: 1, name: "Laptop 1", status: "Available", rating: 5, image: "https://via.placeholder.com/100" },
@@ -37,11 +40,18 @@ const AdminManageItems = () => {
   };
 
   const handleEdit = (id) => {
-    console.log("Edit item", id);
+    navigate(`/edit-item/${id}`);
   };
 
   const handleDelete = (id) => {
-    console.log("Delete item", id);
+    setItemToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    setItems(prev => prev.filter(item => item.id !== itemToDelete));
+    setShowDeleteModal(false);
+    setItemToDelete(null);
   };
 
   return (
@@ -65,10 +75,11 @@ const AdminManageItems = () => {
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="admin-dashboard-container">
         <h1 className="admin-welcome">Manage Items</h1>
 
-        {/* Filters Row */}
+        {/* Filters */}
         <div className="admin-filters-row">
           <Link to="/add-item" className="add-item-btn">
             Add New Item
@@ -91,17 +102,19 @@ const AdminManageItems = () => {
           </select>
         </div>
 
-        {/* Items List */}
+        {/* Items Grid */}
         <div className="admin-items-grid">
           {filteredItems.map(item => (
-            <div 
-              key={item.id} 
+            <div
+              key={item.id}
               className="admin-item-card"
               onClick={(e) => handleCardClick(e, item.id)}
             >
               <img src={item.image} alt={item.name} className="admin-item-img" />
               <h3>{item.name}</h3>
-              <p className={`item-status ${item.status.toLowerCase()}`}>{item.status}</p>
+              <p className={`item-status ${item.status.toLowerCase()}`}>
+                {item.status === "Borrowed" ? "Not Available" : item.status}
+              </p>
 
               <div className="item-rating">
                 <span className="star-icon">⭐</span>
@@ -116,6 +129,20 @@ const AdminManageItems = () => {
           ))}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+  <div className="admin-item-modal-overlay">
+    <div className="admin-item-modal">
+      <p className="admin-item-modal-message">Are you sure you want to delete this item?</p>
+      <div className="admin-item-modal-buttons">
+        <button className="admin-item-yes-btn" onClick={confirmDelete}>Yes</button>
+        <button className="admin-item-no-btn" onClick={() => setShowDeleteModal(false)}>No</button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

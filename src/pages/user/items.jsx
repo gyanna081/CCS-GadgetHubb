@@ -4,7 +4,7 @@ import logo from "../../assets/CCSGadgetHub1.png";
 
 const Items = () => {
   const [items, setItems] = useState([]);
-  const [availabilityFilter, setAvailabilityFilter] = useState("all");
+  const [availabilityFilter, setAvailabilityFilter] = useState("available");
   const [ratingFilter, setRatingFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 

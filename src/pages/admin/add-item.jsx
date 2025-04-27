@@ -9,7 +9,6 @@ const AddItem = () => {
   const [itemName, setItemName] = useState("");
   const [itemDescription, setItemDescription] = useState("");
   const [itemCondition, setItemCondition] = useState("New");
-  const [itemStatus, setItemStatus] = useState("Available"); // 🔥 added
   const [itemImage, setItemImage] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -23,7 +22,6 @@ const AddItem = () => {
       itemName,
       itemDescription,
       itemCondition,
-      itemStatus,
       itemImage,
     });
 
@@ -97,22 +95,9 @@ const AddItem = () => {
               value={itemCondition}
               onChange={(e) => setItemCondition(e.target.value)}
             >
-              <option value="New">New</option>
               <option value="Good">Good</option>
               <option value="Fair">Fair</option>
-              <option value="Needs Repair">Needs Repair</option>
-            </select>
-          </label>
-
-          {/* 🔥 Status Field */}
-          <label>
-            Status:
-            <select
-              value={itemStatus}
-              onChange={(e) => setItemStatus(e.target.value)}
-            >
-              <option value="Available">Available</option>
-              <option value="Borrowed">Borrowed</option>
+              <option value="Poor">Poor</option>
             </select>
           </label>
 
