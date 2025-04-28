@@ -43,12 +43,32 @@ const AdminViewRequest = () => {
                 reason: "School Event",
                 status: "Denied",
                 decisionDate: "Apr 19, 2025"
-            }
+            },
+            {
+                id: 4,
+                borrower: "Michael Tan",
+                item: "iPad Pro",
+                requestCreatedDate: "2025-04-19",
+                requestTime: "8:00 AM - 10:00 AM",
+                borrowDate: "Apr 20, 2025",
+                borrowTime: "11:00 AM - 4:00 PM",
+                reason: "School Event",
+                status: "Returned",
+                decisionDate: "2025-04-20",
+              }
         ];
 
         const foundRequest = dummyRequests.find(req => req.id === parseInt(id));
         setRequestData(foundRequest);
     }, [id]);
+
+    const handleMarkReturned = () => {
+        setRequestData(prev => ({
+            ...prev,
+            status: "Returned",
+            decisionDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        }));
+    };
 
     if (!requestData) {
         return <p>Loading request details...</p>;
@@ -90,9 +110,10 @@ const AdminViewRequest = () => {
                     {/* Request Timeline */}
                     <h3 className="section-header">Request Timeline</h3>
                     <p><strong>Date Request Was Created:</strong> {requestData.requestCreatedDate}</p>
-                    {(requestData.status === "Approved" || requestData.status === "Denied") && (
+                    {(requestData.status === "Approved" || requestData.status === "Denied" || requestData.status === "Returned") && (
                         <p><strong>
-                            {requestData.status === "Approved" ? "Date of Approval:" : "Date of Denial:"}
+                            {requestData.status === "Approved" ? "Date of Approval:" :
+                             requestData.status === "Denied" ? "Date of Denial:" : "Date of Return:"}
                         </strong> {requestData.decisionDate}</p>
                     )}
 
@@ -107,16 +128,30 @@ const AdminViewRequest = () => {
                     <p><strong>Item Requested:</strong> {requestData.item}</p>
                     <p><strong>Reason for Borrowing:</strong> {requestData.reason}</p>
 
+                    {/* Status */}
                     <p>
                         <strong>Current Status:</strong>{" "}
                         <span
                             style={{
-                                color: (requestData.status === "Approved" || requestData.status === "Denied") ? "#E26901" : "inherit"
+                                color: (requestData.status === "Approved" || requestData.status === "Denied") ? "#E26901" :
+                                       (requestData.status === "Returned" ? "#E26901" : "inherit")
                             }}
                         >
                             {requestData.status}
                         </span>
                     </p>
+
+                    {/* Show "Mark as Returned" only if Approved */}
+                    {requestData.status === "Approved" && (
+                        <div style={{ marginTop: "20px" }}>
+                            <button 
+                                className="mark-returned-btn"
+                                onClick={handleMarkReturned}
+                            >
+                                Mark as Returned
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

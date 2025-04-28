@@ -839,6 +839,21 @@
   background-color: #c0392b;
 }
 
+.mark-returned-btn {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  font-size: 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.mark-returned-btn:hover {
+  background-color: #218838;
+}
+
+
 /* Delete Modal Exclusive for Manage Users */
 .admin-user-modal-overlay {
   position: fixed;

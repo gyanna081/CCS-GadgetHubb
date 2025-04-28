@@ -20,7 +20,7 @@ const AdminRequests = () => {
         requestDate: "2025-04-22",
         requestTime: "9:00 AM - 3:00 PM",
         status: "Pending",
-        decisionDate: null
+        decisionDate: null,
       },
       {
         id: 2,
@@ -29,7 +29,7 @@ const AdminRequests = () => {
         requestDate: "2025-04-21",
         requestTime: "10:00 AM - 2:00 PM",
         status: "Approved",
-        decisionDate: "2025-04-22"
+        decisionDate: "2025-04-22",
       },
       {
         id: 3,
@@ -38,7 +38,16 @@ const AdminRequests = () => {
         requestDate: "2025-04-20",
         requestTime: "11:00 AM - 4:00 PM",
         status: "Denied",
-        decisionDate: "2025-04-21"
+        decisionDate: "2025-04-21",
+      },
+      {
+        id: 4,
+        borrower: "Michael Tan",
+        item: "iPad Pro",
+        requestDate: "2025-04-19",
+        requestTime: "8:00 AM - 10:00 AM",
+        status: "Returned",
+        decisionDate: "2025-04-20",
       }
     ];
     setRequests(dummyRequests);
@@ -102,6 +111,7 @@ const AdminRequests = () => {
             <option value="Pending">Pending</option>
             <option value="Approved">Approved</option>
             <option value="Denied">Denied</option>
+            <option value="Returned">Returned</option> {/* ✅ NEW */}
           </select>
 
           <input
@@ -120,8 +130,8 @@ const AdminRequests = () => {
                 key={req.id}
                 className="admin-request-card fixed-card-width"
                 onClick={() => {
-                  if (req.status === "Pending") return; // Pending = no card click
-                  navigate(`/admin-view-request/${req.id}`); // ✅ Correct redirection for Approved/Denied
+                  if (req.status === "Pending") return; // Pending no redirect
+                  navigate(`/admin-view-request/${req.id}`);
                 }}
                 style={{ cursor: req.status !== "Pending" ? "pointer" : "default" }}
               >
@@ -136,7 +146,7 @@ const AdminRequests = () => {
                   <button
                     className="review-btn"
                     onClick={(e) => {
-                      e.stopPropagation(); // prevent card click
+                      e.stopPropagation();
                       navigate(`/review-request/${req.id}`);
                     }}
                   >
