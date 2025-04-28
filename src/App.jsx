@@ -23,9 +23,10 @@ import EditItem from "./pages/admin/edit-item";
 import Requests from "./pages/admin/admin-requests";
 import ReviewRequest from "./pages/admin/review-request";
 import AdminViewRequest from "./pages/admin/admin-view-request";
-import AdminManageUsers from "./pages/admin/admin-users"; // Adjust path based on your folders
-
-
+import AdminManageUsers from "./pages/admin/admin-users"; 
+import ViewUser from "./pages/admin/view-user";
+import EditUser from "./pages/admin/edit-user";
+import AddUser from "./pages/admin/add-user";
 
 
 
@@ -56,9 +57,9 @@ function App() {
         <Route path="/review-request/:id" element={<ReviewRequest />} />
         <Route path="/admin-view-request/:id" element={<AdminViewRequest />} />
         <Route path="/admin-users" element={<AdminManageUsers />} />
-
-
-
+        <Route path="/view-user/:id" element={<ViewUser />} />
+        <Route path="/edit-user/:id" element={<EditUser />} />
+        <Route path="/add-user" element={<AddUser />} />
 
 
       </Routes>

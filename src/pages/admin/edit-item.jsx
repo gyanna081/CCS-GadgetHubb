@@ -92,10 +92,9 @@ const AdminEditItem = () => {
               value={itemCondition}
               onChange={(e) => setItemCondition(e.target.value)}
             >
-              <option value="New">New</option>
               <option value="Good">Good</option>
               <option value="Fair">Fair</option>
-              <option value="Needs Repair">Needs Repair</option>
+              <option value="Poor">Poor</option>
             </select>
           </label>
 

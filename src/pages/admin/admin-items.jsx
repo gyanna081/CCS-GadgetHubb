@@ -14,7 +14,7 @@ const AdminManageItems = () => {
   ];
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("available");
   const [items, setItems] = useState([]);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -98,7 +98,7 @@ const AdminManageItems = () => {
           >
             <option value="all">All</option>
             <option value="available">Available</option>
-            <option value="borrowed">Borrowed</option>
+            <option value="borrowed">Not Available</option>
           </select>
         </div>
 

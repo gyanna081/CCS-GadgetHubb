@@ -7,7 +7,7 @@ const AdminRequests = () => {
   const navigate = useNavigate();
 
   const [requests, setRequests] = useState([]);
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("Pending");
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
 
