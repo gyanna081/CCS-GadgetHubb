@@ -14,10 +14,12 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.0.1",
+    "axios": "^1.9.0",
     "ccs-gadgethub": "file:",
     "firebase": "^11.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-responsive-carousel": "^3.2.23",
     "react-router-dom": "^7.5.0"
   },
   "devDependencies": {
