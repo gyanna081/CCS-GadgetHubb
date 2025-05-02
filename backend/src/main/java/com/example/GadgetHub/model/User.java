@@ -1,15 +1,13 @@
 package com.example.GadgetHub.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor // Required for Firestore deserialization
 @AllArgsConstructor
 public class User {
     private String uid;             // Firebase UID
@@ -17,16 +15,13 @@ public class User {
     private String lastName;        // Last name
     private String email;           // Email
     private String role;            // "admin" or "student"
-    private LocalDateTime createdAt; // When account was created
-
-    // For Firestore compatibility - we'll store as string in Firestore but keep as LocalDateTime in Java
-    public void setCreatedAt(String createdAtStr) {
-        if (createdAtStr != null && !createdAtStr.isEmpty()) {
-            try {
-                this.createdAt = LocalDateTime.parse(createdAtStr);
-            } catch (Exception e) {
-                this.createdAt = LocalDateTime.now();
-            }
-        }
+    private String createdAt;       // Store as string for Firestore compatibility
+    private String course;          // Course (e.g., BSIT)
+    private String year;            // Year level (e.g., 4th Year)
+    private String profileImageUrl; // URL to profile image
+    
+    // Helper method to get full name
+    public String getFullName() {
+        return firstName + " " + lastName;
     }
 }

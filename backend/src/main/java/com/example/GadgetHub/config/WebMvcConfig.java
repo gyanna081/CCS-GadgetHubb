@@ -22,12 +22,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
 
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173") // ✅ Match Vite frontend
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(3600);
-    }
+public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping("/**")
+            // Don't use wildcard "*" with allowCredentials(true)
+            .allowedOrigins("http://localhost:5173", "http://localhost:3000", "http://localhost:5174")
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .allowedHeaders("*")
+            .exposedHeaders("Authorization")
+            // Either remove this line or use specific origins above
+            .allowCredentials(true)
+            .maxAge(3600);
+}
 }

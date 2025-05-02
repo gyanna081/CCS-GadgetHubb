@@ -81,16 +81,61 @@ const Dashboard = () => {
         <div className="items-grid">
           {items.length > 0 ? (
             items.map((item) => (
-              <div key={item.item_id} className="item-box" style={{ padding: "20px", background: "#fff", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
-                {item.imagePath && (
+              <div
+                key={item.id || item.item_id}
+                className="item-box"
+                style={{
+                  padding: "20px",
+                  background: "#fff",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                }}
+              >
+                {item.imagePath ? (
                   <img
-                    src={`http://localhost:8080/uploads/${item.imagePath}`}
+                    src={item.imagePath}
                     alt={item.name}
-                    style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }}
+                    style={{
+                      width: "100%",
+                      height: "150px",
+                      objectFit: "cover",
+                      borderRadius: "8px",
+                      border: "1px solid #ddd",
+                    }}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://placehold.co/300x150?text=No+Image";
+                    }}
                   />
+                ) : (
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "150px",
+                      backgroundColor: "#e0e0e0",
+                      color: "#555",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "8px",
+                      border: "1px solid #ccc",
+                      fontSize: "14px",
+                    }}
+                  >
+                    No Image Available
+                  </div>
                 )}
+
                 <h3 style={{ margin: "10px 0 5px 0" }}>{item.name}</h3>
-                <p style={{ fontSize: "14px", color: "#666", minHeight: "40px" }}>{item.description}</p>
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#666",
+                    minHeight: "40px",
+                  }}
+                >
+                  {item.description}
+                </p>
                 <button
                   className="view-details-button"
                   style={{
@@ -101,9 +146,9 @@ const Dashboard = () => {
                     border: "none",
                     borderRadius: "6px",
                     cursor: "pointer",
-                    fontSize: "14px"
+                    fontSize: "14px",
                   }}
-                  onClick={() => navigate(`/item-details/${item.item_id}`)}
+                  onClick={() => navigate(`/itemdetails/${item.id || item.item_id}`)}
                 >
                   View Details
                 </button>

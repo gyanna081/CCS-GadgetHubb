@@ -6,6 +6,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ItemDetails from "./pages/itemdetails";
 import MyRequests from "./pages/my-requests";
 import Profile from "./pages/profile";
+import EditProfile from "./pages/edit-profile";
 import RequestForm from "./pages/requestform";
 import Signup from "./pages/signup";
 import ViewRequests from "./pages/view-requests";
@@ -24,6 +25,7 @@ function App() {
         <Route path="/admindashboard" element={<AdminDashboard />} />
         <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/edit-profile" element={<EditProfile />} /> {/* Added route for edit profile page */}
         <Route path="/view-requests" element={<ViewRequests />} />
       </Routes>
     </Router>

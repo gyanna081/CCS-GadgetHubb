@@ -9,9 +9,10 @@ import lombok.AllArgsConstructor;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FirebaseUserDto {
+public class ProfileUpdateDto {
     private String uid;
-    private String email;
     private String firstName;
     private String lastName;
+    private String course;
+    private String year;
 }

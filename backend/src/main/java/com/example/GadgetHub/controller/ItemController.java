@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/items")
@@ -86,8 +87,13 @@ public class ItemController {
 
     @GetMapping
     public ResponseEntity<List<Item>> getAllItems() {
-        List<Item> items = itemService.getAllItems();
-        return ResponseEntity.ok(items);
+        try {
+            List<Item> items = itemService.getAllItems();
+            return ResponseEntity.ok(items);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
     }
 
     @GetMapping("/{id}")
@@ -146,16 +152,16 @@ public class ItemController {
             // Return the updated item
             ApiFuture<DocumentSnapshot> updatedFuture = docRef.get();
             DocumentSnapshot updatedDoc = updatedFuture.get();
-            Item updatedItem = updatedDoc.toObject(Item.class);
+            Map<String, Object> updatedData = updatedDoc.getData();
+            updatedData.put("id", updatedDoc.getId());
             
-            return ResponseEntity.ok(updatedItem);
+            return ResponseEntity.ok(updatedData);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }
 
-    // Keep only ONE delete method - with the @PathVariable parameter
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteItem(@PathVariable String id) {
         try {

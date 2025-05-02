@@ -291,33 +291,43 @@ function AdminDashboard() {
                   <td style={{ padding: '10px', textAlign: 'center' }}>
                     {item.imagePath ? (
                       <img
-                        src={item.imagePath}
-                        alt={item.name || "Item"}
-                        style={{ width: '50px', height: '50px', objectFit: 'cover', border: '1px solid #ddd', borderRadius: '4px' }}
-                        onError={(e) => {
-                          console.log(`Image failed to load: ${item.imagePath}`);
-                          e.target.onerror = null;
-                          const name = item.name || "Item";
-                          const initial = name.charAt(0).toUpperCase();
-                          const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
-                          const colorIndex = Math.abs(name.charCodeAt(0)) % colors.length;
-                          const bgColor = colors[colorIndex];
-                          
-                          const canvas = document.createElement('canvas');
-                          canvas.width = 50;
-                          canvas.height = 50;
-                          const ctx = canvas.getContext('2d');
-                          ctx.fillStyle = bgColor;
-                          ctx.fillRect(0, 0, 50, 50);
-                          ctx.fillStyle = '#ffffff';
-                          ctx.font = 'bold 24px Arial';
-                          ctx.textAlign = 'center';
-                          ctx.textBaseline = 'middle';
-                          ctx.fillText(initial, 25, 25);
-                          
-                          e.target.src = canvas.toDataURL();
-                        }}
-                      />
+                      src={
+                        item.imagePath?.startsWith('http')
+                          ? item.imagePath
+                          : `http://localhost:8080/${item.imagePath}`
+                      }
+                      alt={item.name || "Item"}
+                      style={{
+                        width: '50px',
+                        height: '50px',
+                        objectFit: 'cover',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px'
+                      }}
+                      onError={(e) => {
+                        console.warn(`Image failed to load: ${item.imagePath}`);
+                        e.target.onerror = null;
+                        const name = item.name || "Item";
+                        const initial = name.charAt(0).toUpperCase();
+                        const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
+                        const bgColor = colors[Math.abs(name.charCodeAt(0)) % colors.length];
+                    
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 50;
+                        canvas.height = 50;
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = bgColor;
+                        ctx.fillRect(0, 0, 50, 50);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 24px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(initial, 25, 25);
+                    
+                        e.target.src = canvas.toDataURL();
+                      }}
+                    />
+                    
                     ) : (
                       <div style={{ 
                         width: '50px', 

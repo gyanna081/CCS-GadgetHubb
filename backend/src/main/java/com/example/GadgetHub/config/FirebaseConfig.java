@@ -24,7 +24,8 @@ public class FirebaseConfig {
             
             FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .setStorageBucket("ccs-gadgethub.appspot.com")
+                .setStorageBucket("ccs-gadgethub.firebasestorage.app")  // correct bucket from Firebase Storage Console
+
                 .build();
 
             if (FirebaseApp.getApps().isEmpty()) {

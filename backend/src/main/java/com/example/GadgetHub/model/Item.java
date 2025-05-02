@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor // Required for Firestore deserialization
 @AllArgsConstructor
 public class Item {
     private String id;
