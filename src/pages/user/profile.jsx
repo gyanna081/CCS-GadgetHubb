@@ -1,5 +1,8 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebaseconfig";
 import logo from "../../assets/CCSGadgetHub1.png";
 
 const navLinks = [
@@ -11,6 +14,54 @@ const navLinks = [
 
 const Profile = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const auth = getAuth();
+
+  const [userData, setUserData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    course: "",
+    year: "",
+    profileImageUrl: ""
+  });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const docRef = doc(db, "users", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setUserData({
+              firstName: data.firstName || "",
+              lastName: data.lastName || "",
+              email: user.email || "",
+              course: data.course || "",
+              year: data.year || "",
+              profileImageUrl: data.profileImageUrl || ""
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      } else {
+        navigate("/");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth, navigate]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   return (
     <div className="items-page">
@@ -29,7 +80,7 @@ const Profile = () => {
           ))}
         </nav>
         <div style={{ marginLeft: "auto" }}>
-          <Link to="/" className="logout-link">Log Out</Link>
+          <button onClick={handleLogout} className="logout-link">Log Out</button>
         </div>
       </div>
 
@@ -37,7 +88,19 @@ const Profile = () => {
       <div className="profile-page">
         <div className="profile-container">
           {/* Left: Image */}
-          <div className="profile-image">Profile Image</div>
+          <div className="profile-image">
+            {userData.profileImageUrl ? (
+              <img
+                src={`${userData.profileImageUrl}?t=${Date.now()}`}
+                alt="Profile"
+                style={{ width: "150px", height: "150px", borderRadius: "50%", objectFit: "cover" }}
+              />
+            ) : (
+              <div style={{ width: "150px", height: "150px", borderRadius: "50%", backgroundColor: "#eee", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                No Image
+              </div>
+            )}
+          </div>
 
           {/* Right: Info */}
           <div className="profile-info">
@@ -47,21 +110,21 @@ const Profile = () => {
               </Link>
             </div>
 
-            <h2 className="profile-name">Mica Ella Obeso</h2>
+            <h2 className="profile-name">{userData.firstName} {userData.lastName}</h2>
             <p>Student</p>
 
             <div className="profile-grid">
               <div>
                 <p className="profile-label">Course</p>
-                <p><strong>BSIT</strong></p>
+                <p><strong>{userData.course}</strong></p>
               </div>
               <div>
                 <p className="profile-label">Email</p>
-                <p>micaella.obeso@cit.edu</p>
+                <p>{userData.email}</p>
               </div>
               <div>
                 <p className="profile-label">Year</p>
-                <p>4th Year</p>
+                <p>{userData.year}</p>
               </div>
             </div>
           </div>

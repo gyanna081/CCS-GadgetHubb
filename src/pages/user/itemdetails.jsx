@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebaseconfig";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import logo from "../../assets/CCSGadgetHub1.png";
@@ -14,39 +16,37 @@ const navLinks = [
 const ItemDetails = () => {
   const { itemId } = useParams();
   const [item, setItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const location = useLocation();
 
   useEffect(() => {
-    const fetchedItems = [
-      {
-        id: 1,
-        name: "Laptop 1",
-        available: true,
-        rating: 5,
-        images: ["image1.jpg", "image2.jpg"],
-        description: "A powerful laptop for all your needs.",
-        condition: "Good",
-        conditionDescription: "Well-maintained, minor scratches on the body.",
-      },
-      {
-        id: 2,
-        name: "Laptop 2",
-        available: true,
-        rating: 4,
-        images: ["image3.jpg", "image4.jpg"],
-        description: "A lightweight laptop for everyday use.",
-        condition: "Excellent",
-        conditionDescription: "Barely used, no visible damage.",
-      },
-    ];
+    const fetchItem = async () => {
+      try {
+        const docRef = doc(db, "items", itemId);
+        const docSnap = await getDoc(docRef);
 
-    const itemData = fetchedItems.find((item) => item.id === parseInt(itemId));
-    setItem(itemData);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          // If only one imagePath exists, convert to array for Carousel compatibility
+          data.images = data.images || [data.imagePath];
+          setItem(data);
+        } else {
+          setError("Item not found.");
+        }
+      } catch (err) {
+        console.error("Error fetching item:", err);
+        setError("Failed to load item.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItem();
   }, [itemId]);
 
-  if (!item) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error || !item) return <div>{error || "Item not available."}</div>;
 
   return (
     <div className="items-page">
@@ -83,7 +83,12 @@ const ItemDetails = () => {
           <Carousel showThumbs={false}>
             {item.images.map((image, index) => (
               <div key={index}>
-                <img src={`../assets/${image}`} alt={`Item ${index + 1}`} />
+                <img
+  src={image}
+  alt={`Item ${index + 1}`}
+  style={{ height: "250px", objectFit: "contain" }} // 👈 adjust size here
+/>
+
               </div>
             ))}
           </Carousel>
@@ -96,17 +101,20 @@ const ItemDetails = () => {
             <p className="item-description">{item.description}</p>
 
             <h3>Condition</h3>
-            <p>{item.condition}: {item.conditionDescription}</p>
+            <p>
+              {item.condition}
+              {item.conditionDescription ? `: ${item.conditionDescription}` : ""}
+            </p>
           </div>
 
           <div className="details-right">
             <h3>Status:</h3>
-            <p className={`status-text ${item.available ? 'available' : 'not-available'}`}>
-              {item.available ? "Available" : "Not Available"}
+            <p className={`status-text ${item.status === "Available" ? "available" : "not-available"}`}>
+              {item.status === "Available" ? "Available" : "Not Available"}
             </p>
 
-            {item.available ? (
-              <Link to={`/borrow/${item.id}`} className="borrow-btn">Borrow Item</Link>
+            {item.status === "Available" ? (
+              <Link to={`/borrow/${itemId}`} className="borrow-btn">Borrow Item</Link>
             ) : (
               <button disabled className="borrow-btn not-available-btn">Not Available</button>
             )}

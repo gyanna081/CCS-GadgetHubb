@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/CCSGadgetHub1.png";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebaseconfig";
 
 const Items = () => {
   const [items, setItems] = useState([]);
@@ -11,15 +13,20 @@ const Items = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const fetchedItems = [
-      { id: 1, name: "Laptop 1", available: true, rating: 5, image: "https://via.placeholder.com/120?text=Laptop+1" },
-      { id: 2, name: "Laptop 2", available: true, rating: 4, image: "https://via.placeholder.com/120?text=Laptop+2" },
-      { id: 3, name: "Laptop 3", available: false, rating: 3, image: "https://via.placeholder.com/120?text=Laptop+3" },
-      { id: 4, name: "Laptop 4", available: true, rating: 5, image: "https://via.placeholder.com/120?text=Laptop+4" },
-      { id: 5, name: "Laptop 5", available: false, rating: 3, image: "https://via.placeholder.com/120?text=Laptop+5" },
-      { id: 6, name: "Laptop 6", available: true, rating: 4, image: "https://via.placeholder.com/120?text=Laptop+6" },
-    ];
-    setItems(fetchedItems);
+    const fetchItems = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "items"));
+        const fetchedItems = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setItems(fetchedItems);
+      } catch (error) {
+        console.error("Failed to fetch items from Firestore:", error);
+      }
+    };
+
+    fetchItems();
   }, []);
 
   const navLinks = [
@@ -32,14 +39,14 @@ const Items = () => {
   const filteredItems = items.filter((item) => {
     const matchesAvailability =
       availabilityFilter === "all" ||
-      (availabilityFilter === "available" && item.available) ||
-      (availabilityFilter === "not-available" && !item.available);
+      (availabilityFilter === "available" && item.status === "Available") ||
+      (availabilityFilter === "not-available" && item.status !== "Available");
 
     const matchesRating =
       ratingFilter === "all" || item.rating === parseInt(ratingFilter);
 
     const matchesSearch = item.name
-      .toLowerCase()
+      ?.toLowerCase()
       .includes(searchQuery.toLowerCase());
 
     return matchesAvailability && matchesRating && matchesSearch;
@@ -118,19 +125,23 @@ const Items = () => {
 
         {/* Laptop Grid */}
         <div className="items-grid">
-          {filteredItems.map((item) => (
-            <div key={item.id} className="item-box">
-              <img src={item.image} alt={item.name} className="item-image" />
-              <h3>{item.name}</h3>
-              <p className="item-status">
-                {item.available ? "Available" : "Not Available"}
-              </p>
-              <p className="item-rating">⭐ {item.rating}</p>
-              <Link to={`/useritem-details/${item.id}`} className="item-details-btn">
-                View Details
-              </Link>
-            </div>
-          ))}
+          {filteredItems.length > 0 ? (
+            filteredItems.map((item) => (
+              <div key={item.id} className="item-box">
+                <img src={item.imagePath} alt={item.name} className="item-image" />
+                <h3>{item.name}</h3>
+                <p className="item-status">
+                  {item.status === "Available" ? "Available" : "Not Available"}
+                </p>
+                <p className="item-rating">⭐ {item.rating || 5}</p>
+                <Link to={`/useritem-details/${item.id}`} className="item-details-btn">
+                  View Details
+                </Link>
+              </div>
+            ))
+          ) : (
+            <p>No items found.</p>
+          )}
         </div>
       </div>
     </div>

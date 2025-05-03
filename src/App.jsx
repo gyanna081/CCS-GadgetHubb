@@ -14,8 +14,7 @@ import MyRequests from "./pages/user/my-requests";
 import ViewRequest from "./pages/user/view-request";
 
 // Admin pages
-
-import AdminDashboard from "./pages/admin/admin-dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import ManageItems from "./pages/admin/admin-items";
 import AddItem from "./pages/admin/add-item";
 import ViewItem from "./pages/admin/view-item";
@@ -28,26 +27,26 @@ import ViewUser from "./pages/admin/view-user";
 import EditUser from "./pages/admin/edit-user";
 import AddUser from "./pages/admin/add-user";
 
-
-
 function App() {
   return (
     <Router>
       <Routes>
-        {/* User Routes */}
+        {/* Public Routes */}
         <Route path="/" element={<Login />} />
-        <Route path="/userdashboard" element={<Dashboard />} />
-        <Route path="/useritems" element={<Items />} />
-        <Route path="/useritem-details/:itemId" element={<ItemDetails />} /> {/* Dynamic route for item details */}
-        <Route path="/borrow/:itemId" element={<RequestForm />} />
         <Route path="/register" element={<Register />} />
+
+        {/* User Routes */}
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/useritems" element={<Items />} />
+        <Route path="/useritem-details/:itemId" element={<ItemDetails />} />
+        <Route path="/borrow/:itemId" element={<RequestForm />} />
         <Route path="/userprofile" element={<Profile />} />
         <Route path="/usereditprofile" element={<EditProfile />} />
         <Route path="/my-requests" element={<MyRequests />} />
         <Route path="/view-request/:id" element={<ViewRequest />} />
 
         {/* Admin Routes */}
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/admindashboard" element={<AdminDashboard />} />
         <Route path="/admin-items" element={<ManageItems />} />
         <Route path="/add-item" element={<AddItem />} />
         <Route path="/view-item/:id" element={<ViewItem />} />
@@ -59,8 +58,6 @@ function App() {
         <Route path="/view-user/:id" element={<ViewUser />} />
         <Route path="/edit-user/:id" element={<EditUser />} />
         <Route path="/add-user" element={<AddUser />} />
-
-
       </Routes>
     </Router>
   );

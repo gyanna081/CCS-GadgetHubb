@@ -1,6 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { db } from "../../firebaseconfig";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { auth } from "../../firebaseconfig";
 import logo from "../../assets/CCSGadgetHub1.png";
 
 const MyRequests = () => {
@@ -11,33 +13,47 @@ const MyRequests = () => {
   const [requests, setRequests] = useState([]);
 
   useEffect(() => {
-    const dummyData = [
-      { id: 1, item: "Dell Laptop", date: "2025-04-12T09:30", status: "Approved", returnDate: "" },
-      { id: 2, item: "Macbook Air", date: "2025-04-10T14:00", status: "Pending", returnDate: "" },
-      { id: 3, item: "Huawei Matebook", date: "2025-04-05T11:15", status: "Returned", returnDate: "2025-04-06T10:00" },
-    ];
-    setRequests(dummyData);
+    const fetchRequests = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const q = query(
+          collection(db, "borrowRequests"),
+          where("userId", "==", user.uid)
+        );
+
+        const querySnapshot = await getDocs(q);
+        const fetchedRequests = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setRequests(fetchedRequests);
+      } catch (err) {
+        console.error("Failed to fetch requests:", err);
+      }
+    };
+
+    fetchRequests();
   }, []);
 
   const filteredRequests = requests.filter((req) => {
-    const matchesSearch = req.item.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = req.itemName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || req.status.toLowerCase() === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "-";
-    const options = { year: "numeric", month: "short", day: "numeric" };
-    return new Date(dateStr).toLocaleDateString(undefined, options);
+  const formatDate = (timestamp) => {
+    if (!timestamp) return "-";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   };
 
-  const formatDateTime = (dateTimeStr) => {
-    if (!dateTimeStr) return "-";
-    const options = {
-      year: "numeric", month: "short", day: "numeric",
-      hour: "2-digit", minute: "2-digit"
-    };
-    return new Date(dateTimeStr).toLocaleString(undefined, options);
+  const formatDateTime = (timestamp) => {
+    if (!timestamp) return "-";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleString();
   };
 
   return (
@@ -92,15 +108,15 @@ const MyRequests = () => {
               <th>Item</th>
               <th>Request Date</th>
               <th>Status</th>
-              <th>Returned Date & Time</th>
+              <th>Return Time</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {filteredRequests.map((req) => (
               <tr key={req.id}>
-                <td>{req.item}</td>
-                <td>{formatDate(req.date)}</td>
+                <td>{req.itemName}</td>
+                <td>{formatDate(req.borrowDate)}</td>
                 <td><span className={`status-badge ${req.status.toLowerCase()}`}>{req.status}</span></td>
                 <td>{req.status.toLowerCase() === "returned" ? formatDateTime(req.returnDate) : "-"}</td>
                 <td>
