@@ -30,7 +30,7 @@ const EditProfile = () => {
         try {
           const idToken = await user.getIdToken();
           const response = await axios.get(
-            `http://localhost:8080/api/users/${user.uid}/profile`,
+            `https://ccs-gadgethubb.onrender.com/api/users/${user.uid}/profile`,
             {
               headers: {
                 Authorization: `Bearer ${idToken}`,
@@ -123,7 +123,7 @@ const EditProfile = () => {
       };
 
       await axios.put(
-        `http://localhost:8080/api/users/${userId}/profile`,
+        `https://ccs-gadgethubb.onrender.com/api/users/${userId}/profile`,
         profileData,
         {
           headers: {
@@ -139,7 +139,7 @@ const EditProfile = () => {
         formData.append("image", profileImage);
 
         const uploadRes = await axios.post(
-          `http://localhost:8080/api/users/${userId}/profile-image`,
+          `hhttps://ccs-gadgethubb.onrender.com/api/users/${userId}/profile-image`,
           formData,
           {
             headers: {

@@ -110,7 +110,7 @@ const AdminManageItems = () => {
                 src={
                   item.imagePath?.startsWith("http")
                     ? item.imagePath
-                    : `http://localhost:8080/${item.imagePath}`
+                    : `https://ccs-gadgethubb.onrender.com${item.imagePath}`
                 }
                 alt={item.name}
                 className="admin-item-img"

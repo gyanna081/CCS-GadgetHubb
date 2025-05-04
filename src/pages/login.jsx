@@ -13,7 +13,7 @@ const Login = () => {
 
   const redirectBasedOnRole = async (uid) => {
     try {
-      const res = await axios.get(`http://localhost:8080/api/sync/get-by-uid?uid=${uid}`);
+      const res = await axios.get(`https://ccs-gadgethubb.onrender.com/api/sync/get-by-uid?uid=${uid}`);
       const user = res.data;
       if (user.role === "admin") {
         navigate("/admin-dashboard");
@@ -38,7 +38,7 @@ const Login = () => {
       const firstName = nameParts[0] || "Unnamed";
       const lastName = nameParts.slice(1).join(" ") || "";
 
-      await axios.post("http://localhost:8080/api/sync/user", {
+      await axios.post("https://ccs-gadgethubb.onrender.com/api/sync/user", {
         uid: user.uid,
         email: user.email,
         firstName,

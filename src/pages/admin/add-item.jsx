@@ -36,7 +36,7 @@ const AddItem = () => {
     }
 
     try {
-      await axios.post("http://localhost:8080/api/items", formData, {
+      await axios.post("https://ccs-gadgethubb.onrender.com/api/items", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
