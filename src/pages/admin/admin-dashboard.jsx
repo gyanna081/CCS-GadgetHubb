@@ -9,7 +9,9 @@ import {
   query,
   where,
   orderBy,
-  limit
+  limit,
+  doc,
+  getDoc
 } from "firebase/firestore";
 
 const AdminDashboard = () => {
@@ -30,36 +32,45 @@ const AdminDashboard = () => {
 
         const reqRef = collection(db, "borrowRequests");
 
-        const approvedSnap = await getDocs(
-          query(reqRef, where("status", "==", "Approved"))
-        );
+        const approvedSnap = await getDocs(query(reqRef, where("status", "==", "Approved")));
         setApprovedCount(approvedSnap.size);
 
-        const pendingSnap = await getDocs(
-          query(reqRef, where("status", "==", "Pending"))
-        );
-        const pendingList = pendingSnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setPendingRequests(pendingList);
-
-        const returnedSnap = await getDocs(
-          query(reqRef, where("status", "==", "Returned"))
-        );
-        setReturnedCount(returnedSnap.size);
-
-        const activitySnap = await getDocs(
-          query(reqRef, orderBy("requestDate", "desc"), limit(5))
-        );
-        const recent = activitySnap.docs.map((doc) => {
-          const d = doc.data();
+        const pendingSnap = await getDocs(query(reqRef, where("status", "==", "Pending")));
+        const pendingList = pendingSnap.docs.map((doc) => {
+          const data = doc.data();
           return {
             id: doc.id,
-            text: `${d.borrowerName || "User"} ${d.status?.toLowerCase()} "${d.itemName || "item"}"`,
-            date: d.requestDate || "N/A"
+            itemName: data.itemName || "Unnamed Item",
+            borrowerName: data.userName || data.borrowerName || "Unknown User",
+            requestDate: data.borrowDate || data.requestDate || "N/A"
           };
         });
+        setPendingRequests(pendingList);
+
+        const returnedSnap = await getDocs(query(reqRef, where("status", "==", "Returned")));
+        setReturnedCount(returnedSnap.size);
+
+        const activitySnap = await getDocs(query(reqRef, orderBy("createdAt", "desc"), limit(3)));
+        const recent = await Promise.all(activitySnap.docs.map(async (docSnap) => {
+          const data = docSnap.data();
+          let fullName = data.userName || data.borrowerName || "Unknown User";
+
+          if (data.userId) {
+            const userRef = doc(db, "users", data.userId);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+              const user = userSnap.data();
+              fullName = `${user.firstName} ${user.lastName}`;
+            }
+          }
+
+          return {
+            id: docSnap.id,
+            text: `${fullName} ${data.status?.toLowerCase()} to borrow ${data.itemName || "an item"}`,
+            date: data.borrowDate || "N/A"
+          };
+        }));
+
         setRecentActivities(recent);
       } catch (err) {
         console.error("Dashboard data fetch error:", err);
@@ -87,7 +98,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-      {/* Navbar */}
       <div className="navbar">
         <img src={logo} alt="CCS Gadget Hub Logo" />
         <nav>
@@ -106,12 +116,10 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="admin-dashboard-container">
         <h1 className="admin-welcome">Welcome back, Admin!</h1>
-        <p className="admin-subtext">Here’s an overview of recent gadget hub activity.</p>
+        <p className="admin-subtext">Here's an overview of recent gadget hub activity.</p>
 
-        {/* Cards */}
         <div className="admin-cards">
           <div className="admin-card clickable" onClick={() => handleCardClick("/admin-items")}>
             <h3>{totalItems}</h3>
@@ -132,19 +140,18 @@ const AdminDashboard = () => {
         </div>
 
         <div className="admin-columns">
-          {/* Recent Activity */}
           <div className="admin-activity-box clickable" onClick={() => handleCardClick("/admin-requests")}>
             <h3>Recent Activity</h3>
-            <ul>
+            <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
               {recentActivities.map((log) => (
-                <li key={log.id}>
-                  {log.text} - <span>{log.date}</span>
+                <li key={log.id} style={{ padding: "12px 0", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>{log.text}</div>
+                  <div style={{ color: "#888", fontSize: "0.85em" }}>{log.date}</div>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Pending Approval */}
           <div className="admin-pending-box clickable" onClick={() => handleCardClick("/admin-requests")}>
             <h3>Pending Approvals</h3>
             {pendingRequests.length > 0 ? (

@@ -1,35 +1,85 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import logo from "../../assets/CCSGadgetHub1.png";
+import { db } from "../../firebaseconfig";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const AdminEditItem = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // Dummy data fetching simulation (you would fetch this in a real app)
-  const [itemName, setItemName] = useState("Dell Laptop");
-  const [itemDescription, setItemDescription] = useState("A high-performance laptop suitable for work and study.");
+  const [itemName, setItemName] = useState("");
+  const [itemDescription, setItemDescription] = useState("");
   const [itemCondition, setItemCondition] = useState("Good");
   const [itemStatus, setItemStatus] = useState("Available");
   const [itemImage, setItemImage] = useState(null);
+  const [existingImageUrl, setExistingImageUrl] = useState("");
+
+  // Fetch item details
+  useEffect(() => {
+    const fetchItem = async () => {
+      try {
+        const docRef = doc(db, "items", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setItemName(data.name);
+          setItemDescription(data.description);
+          setItemCondition(data.condition || "Good");
+          setItemStatus(data.status || "Available");
+          setExistingImageUrl(data.imagePath || "");
+        } else {
+          alert("Item not found.");
+          navigate("/admin-items");
+        }
+      } catch (err) {
+        console.error("Error fetching item:", err);
+        alert("Failed to load item.");
+      }
+    };
+
+    fetchItem();
+  }, [id, navigate]);
 
   const handleImageChange = (e) => {
     setItemImage(e.target.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({
-      id,
-      itemName,
-      itemDescription,
-      itemCondition,
-      itemStatus,
-      itemImage,
-    });
-    alert("Item updated successfully!");
-    navigate("/admin-items");
+    try {
+      const docRef = doc(db, "items", id);
+      let imageUrl = existingImageUrl;
+
+      // If a new image is selected, upload it
+      if (itemImage) {
+        const imageRef = ref(storage, `uploads/${Date.now()}_${itemImage.name}`);
+        await uploadBytes(imageRef, itemImage);
+        imageUrl = await getDownloadURL(imageRef);
+      }
+
+      await updateDoc(docRef, {
+        name: itemName,
+        description: itemDescription,
+        condition: itemCondition,
+        status: itemStatus,
+        imagePath: imageUrl,
+        updatedAt: serverTimestamp(),
+      });
+
+      alert("Item updated successfully!");
+      navigate("/admin-items");
+    } catch (err) {
+      console.error("Failed to update item:", err);
+      alert("Failed to update item.");
+    }
   };
 
   return (
@@ -117,6 +167,13 @@ const AdminEditItem = () => {
               onChange={handleImageChange}
             />
           </label>
+
+          {existingImageUrl && (
+            <div style={{ marginBottom: "10px" }}>
+              <strong>Current Image:</strong><br />
+              <img src={existingImageUrl} alt="Current" style={{ maxWidth: "150px", marginTop: "5px" }} />
+            </div>
+          )}
 
           <button type="submit" className="submit-btn">Update Item</button>
         </form>

@@ -102,8 +102,8 @@ const Dashboard = () => {
 
         <div className="items-grid">
           {items.length > 0 ? (
-            items.map((item, index) => (
-              <div key={index} className="item-box">
+            items.map((item) => (
+              <Link to={`/useritem-details/${item.id}`} key={item.id} className="item-box">
                 <img
                   src={item.imagePath || "https://via.placeholder.com/150"}
                   alt={item.name}
@@ -111,7 +111,7 @@ const Dashboard = () => {
                 />
                 <h4>{item.name}</h4>
                 <p className="item-status">{item.status}</p>
-              </div>
+              </Link>
             ))
           ) : (
             <p>No items found.</p>
