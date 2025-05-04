@@ -22,8 +22,7 @@ const Profile = () => {
     lastName: "",
     email: "",
     course: "",
-    year: "",
-    profileImageUrl: ""
+    year: ""
   });
 
   useEffect(() => {
@@ -39,8 +38,7 @@ const Profile = () => {
               lastName: data.lastName || "",
               email: user.email || "",
               course: data.course || "",
-              year: data.year || "",
-              profileImageUrl: data.profileImageUrl || ""
+              year: data.year || ""
             });
           }
         } catch (error) {
@@ -87,26 +85,11 @@ const Profile = () => {
       {/* Profile Content */}
       <div className="profile-page">
         <div className="profile-container">
-          {/* Left: Image */}
-          <div className="profile-image">
-            {userData.profileImageUrl ? (
-              <img
-                src={`${userData.profileImageUrl}?t=${Date.now()}`}
-                alt="Profile"
-                style={{ width: "150px", height: "150px", borderRadius: "50%", objectFit: "cover" }}
-              />
-            ) : (
-              <div style={{ width: "150px", height: "150px", borderRadius: "50%", backgroundColor: "#eee", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                No Image
-              </div>
-            )}
-          </div>
-
-          {/* Right: Info */}
-          <div className="profile-info">
-            <div className="profile-edit">
+          <div className="profile-info" style={{ width: "100%" }}>
+            <div className="profile-edit" style={{ textAlign: "right" }}>
               <Link to="/usereditprofile">
-                <button className="edit-btn">Edit Profile</button>
+                <button className="edit-btn" style={{ padding: "8px 20px", fontSize: "15px", backgroundColor: "#d96528" }}
+                >Edit Profile</button>
               </Link>
             </div>
 
