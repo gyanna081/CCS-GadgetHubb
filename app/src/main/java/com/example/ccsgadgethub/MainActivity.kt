@@ -8,13 +8,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.ccsgadgethub.ui.DashboardScreen
-import com.example.ccsgadgethub.ui.theme.CCSGadgetHubTheme
+import com.example.ccsgadgethub.ui.*
+import com.example.ccsgadgethub.viewmodel.RequestViewModel
+import com.example.ccsgadgethub.ui.theme.CCSGadgetHubTheme // ✅ Fixed import
+
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -46,7 +49,11 @@ class MainActivity : ComponentActivity() {
                         // Dashboard Screen
                         composable("dashboard") { DashboardScreen(navController) }
 
-                        // ✅ No more "requests" screen!
+                        // ✅ My Requests Screen
+                        composable("my_requests") {
+                            val requestViewModel: RequestViewModel = viewModel()
+                            MyRequestsScreen(navController, requestViewModel)
+                        }
 
                         // Item Detail Screen
                         composable(
@@ -59,7 +66,7 @@ class MainActivity : ComponentActivity() {
                             ItemDetailScreen(navController, itemName)
                         }
 
-                        // Request Form Screen (Borrow Item Form)
+                        // Request Form Screen
                         composable(
                             route = "request_form/{itemName}",
                             arguments = listOf(navArgument("itemName") { type = NavType.StringType })

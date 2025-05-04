@@ -36,7 +36,7 @@ fun DashboardScreen(navController: NavController) {
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                // ✅ Top Bar (Menu + Logo) SAME ALIGNMENT as HomeScreen
+                // ✅ Top Bar (Menu + Logo)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -57,11 +57,11 @@ fun DashboardScreen(navController: NavController) {
                     Image(
                         painter = painterResource(id = R.drawable.logo2),
                         contentDescription = "Logo",
-                        modifier = Modifier.size(60.dp) // ✅ Bigger logo to match HomeScreen
+                        modifier = Modifier.size(60.dp)
                     )
                 }
 
-                // Sidebar Links
+                // ✅ Sidebar Links
                 Column(
                     modifier = Modifier.padding(start = 24.dp, top = 32.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -84,18 +84,13 @@ fun DashboardScreen(navController: NavController) {
                         text = "My Requests",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(
-                        text = "Activity Log",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        color = Color.Black,
+                        modifier = Modifier.clickable { navController.navigate("my_requests") }
                     )
                 }
             }
 
-            // Log Out Button at Bottom
+            // ✅ Log Out Button at Bottom
             Button(
                 onClick = {
                     navController.navigate("login") {
@@ -117,7 +112,5 @@ fun DashboardScreen(navController: NavController) {
                 Text("Log Out", color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
-
-
     }
 }

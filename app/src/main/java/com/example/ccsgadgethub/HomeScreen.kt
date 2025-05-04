@@ -100,9 +100,9 @@ fun HomeScreen(navController: NavController) {
             ) {
                 Text("Borrow Item", color = Color.Black)
             }
-            // ✅ View Requests button
+            // ✅ View Requests button (UPDATED)
             Button(
-                onClick = { navController.navigate("requests") },
+                onClick = { navController.navigate("my_requests") },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDE6A00)),
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.padding(horizontal = 8.dp)
