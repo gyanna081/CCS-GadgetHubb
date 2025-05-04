@@ -1,10 +1,10 @@
 package com.example.GadgetHub.config;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
@@ -19,33 +19,27 @@ public class FirebaseConfig {
     @PostConstruct
     public void initializeFirebase() {
         try {
-            ClassPathResource resource = new ClassPathResource("firebase-service-account.json");
-            InputStream serviceAccount = resource.getInputStream();
-            
-            System.out.println("✅ Firebase service account file found, attempting initialization...");
-            
-            FirebaseOptions options = new FirebaseOptions.Builder()
-                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .setStorageBucket("ccs-gadgethub.appspot.com")
-                // correct bucket from Firebase Storage Console
+            String firebaseConfigJson = System.getenv("FIREBASE_CONFIG_JSON");
 
-                .build();
+            if (firebaseConfigJson == null || firebaseConfigJson.isEmpty()) {
+                throw new IllegalStateException("❌ FIREBASE_CONFIG_JSON environment variable is not set or empty");
+            }
+
+            InputStream serviceAccount = new ByteArrayInputStream(firebaseConfigJson.getBytes(StandardCharsets.UTF_8));
+
+            FirebaseOptions options = new FirebaseOptions.Builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .setStorageBucket("ccs-gadgethub.appspot.com") // ✅ your actual bucket
+                    .build();
 
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
-                // Test Firestore connection immediately
-                try {
-                    FirestoreClient.getFirestore();
-                    System.out.println("✅ Firebase and Firestore initialized successfully");
-                } catch (Exception e) {
-                    System.err.println("❌ Firestore initialization failed: " + e.getMessage());
-                    e.printStackTrace();
-                }
-            } else {
-                System.out.println("✅ Firebase already initialized with apps: " + FirebaseApp.getApps().size());
+                FirestoreClient.getFirestore(); // test connection
+                System.out.println("✅ Firebase initialized via environment variable");
             }
-        } catch (IOException e) {
-            System.err.println("❌ Failed to initialize Firebase: " + e.getMessage());
+
+        } catch (Exception e) {
+            System.err.println("❌ Failed to initialize Firebase from env variable: " + e.getMessage());
             e.printStackTrace();
         }
     }
