@@ -35,7 +35,11 @@ public class UserService {
             if (dto.getUid() == null || dto.getUid().trim().isEmpty()) {
                 throw new IllegalArgumentException("User ID cannot be null or empty");
             }
-            
+
+            if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+                throw new IllegalArgumentException("Email cannot be null or empty");
+            }
+
             DocumentReference ref = firestore.collection("users").document(dto.getUid());
             ApiFuture<DocumentSnapshot> future = ref.get();
             DocumentSnapshot snapshot = future.get();
@@ -52,7 +56,6 @@ public class UserService {
                     ref.update(updates).get();
                 }
 
-                // ensure returned object has no null fields
                 if (existing.getCourse() == null) existing.setCourse("");
                 if (existing.getYear() == null) existing.setYear("");
                 if (existing.getProfileImageUrl() == null) existing.setProfileImageUrl("");
@@ -82,7 +85,15 @@ public class UserService {
                 data.put("year", "");
                 data.put("profileImageUrl", "");
 
-                ref.set(data).get();
+                System.out.println("🔄 Creating new user with data: " + data);
+
+                try {
+                    ref.set(data).get();
+                } catch (Exception e) {
+                    System.err.println("❌ Firestore write failed: " + e.getMessage());
+                    throw new RuntimeException("Firestore set() failed", e);
+                }
+
                 return newUser;
             }
         } catch (InterruptedException e) {
@@ -90,6 +101,9 @@ public class UserService {
             throw new RuntimeException("Error syncing user: interrupted operation", e);
         } catch (ExecutionException e) {
             throw new RuntimeException("Error syncing user: execution failed", e);
+        } catch (Exception e) {
+            System.err.println("❌ Unexpected sync error: " + e.getMessage());
+            throw new RuntimeException("Error syncing user: " + e.getMessage(), e);
         }
     }
 
@@ -98,11 +112,11 @@ public class UserService {
             if (uid == null || uid.trim().isEmpty()) {
                 return Optional.empty();
             }
-            
+
             DocumentReference docRef = firestore.collection("users").document(uid);
             ApiFuture<DocumentSnapshot> future = docRef.get();
             DocumentSnapshot snapshot = future.get();
-            
+
             if (!snapshot.exists()) {
                 return Optional.empty();
             }
@@ -112,7 +126,6 @@ public class UserService {
                 return Optional.empty();
             }
 
-            // Ensure no null values in profile fields
             if (user.getCourse() == null) user.setCourse("");
             if (user.getYear() == null) user.setYear("");
             if (user.getProfileImageUrl() == null) user.setProfileImageUrl("");
@@ -130,7 +143,7 @@ public class UserService {
         if (dto.getUid() == null || dto.getUid().trim().isEmpty()) {
             throw new IllegalArgumentException("User ID cannot be null or empty");
         }
-        
+
         DocumentReference ref = firestore.collection("users").document(dto.getUid());
         ApiFuture<DocumentSnapshot> future = ref.get();
         DocumentSnapshot snapshot = future.get();
@@ -164,10 +177,9 @@ public class UserService {
 
         if (!updates.isEmpty()) {
             ApiFuture<WriteResult> updateFuture = ref.update(updates);
-            updateFuture.get(); // Wait for update to complete
+            updateFuture.get();
         }
 
-        // Ensure no null values in profile fields
         if (user.getCourse() == null) user.setCourse("");
         if (user.getYear() == null) user.setYear("");
         if (user.getProfileImageUrl() == null) user.setProfileImageUrl("");
@@ -179,11 +191,11 @@ public class UserService {
         if (uid == null || uid.trim().isEmpty()) {
             throw new IllegalArgumentException("User ID cannot be null or empty");
         }
-        
+
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File cannot be null or empty");
         }
-        
+
         Storage storage = StorageClient.getInstance().bucket().getStorage();
         String bucketName = StorageClient.getInstance().bucket().getName();
         String filename = uid + "_" + UUID.randomUUID();
@@ -194,18 +206,15 @@ public class UserService {
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
                 .setContentType(contentType)
                 .build();
-                
-        // Upload the file to Firebase Storage
+
         storage.create(blobInfo, file.getBytes());
 
-        // Generate the image URL
         String imageUrl = String.format("https://storage.googleapis.com/%s/%s", bucketName, path);
 
-        // Update the user's profile image URL in Firestore
         DocumentReference ref = firestore.collection("users").document(uid);
         ApiFuture<WriteResult> updateFuture = ref.update("profileImageUrl", imageUrl);
-        updateFuture.get(); // Wait for update to complete
+        updateFuture.get();
 
         return imageUrl;
     }
-}   
+}
