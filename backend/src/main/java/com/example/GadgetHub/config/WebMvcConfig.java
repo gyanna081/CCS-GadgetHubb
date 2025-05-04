@@ -20,6 +20,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:" + uploadPath + "/")
                 .setCachePeriod(0);
     }
-
-    // CORS is now handled in CorsConfig.java to avoid duplication
 }
