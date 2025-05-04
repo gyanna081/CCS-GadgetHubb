@@ -66,7 +66,7 @@ const Login = () => {
       const firstName = nameParts[0] || "Unnamed";
       const lastName = nameParts.slice(1).join(" ") || "";
 
-      await axios.post("http://localhost:8080/api/sync/user", {
+      await axios.post("https://ccs-gadgethubb.onrender.com/api/sync/user", {
         uid: user.uid,
         email: user.email,
         firstName,
