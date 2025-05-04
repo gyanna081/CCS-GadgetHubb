@@ -7,7 +7,6 @@ import { db } from "../../firebaseconfig";
 const Items = () => {
   const [items, setItems] = useState([]);
   const [availabilityFilter, setAvailabilityFilter] = useState("available");
-  const [ratingFilter, setRatingFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   const location = useLocation();
@@ -42,14 +41,11 @@ const Items = () => {
       (availabilityFilter === "available" && item.status === "Available") ||
       (availabilityFilter === "not-available" && item.status !== "Available");
 
-    const matchesRating =
-      ratingFilter === "all" || item.rating === parseInt(ratingFilter);
-
     const matchesSearch = item.name
       ?.toLowerCase()
       .includes(searchQuery.toLowerCase());
 
-    return matchesAvailability && matchesRating && matchesSearch;
+    return matchesAvailability && matchesSearch;
   });
 
   return (
@@ -100,25 +96,11 @@ const Items = () => {
             <select
               value={availabilityFilter}
               onChange={(e) => setAvailabilityFilter(e.target.value)}
-              style={{ marginLeft: "8px", marginRight: "20px" }}
+              style={{ marginLeft: "8px" }}
             >
               <option value="all">All</option>
               <option value="available">Available</option>
               <option value="not-available">Not Available</option>
-            </select>
-          </label>
-
-          <label>
-            Rating:
-            <select
-              value={ratingFilter}
-              onChange={(e) => setRatingFilter(e.target.value)}
-              style={{ marginLeft: "8px" }}
-            >
-              <option value="all">All</option>
-              <option value="3">3 stars</option>
-              <option value="4">4 stars</option>
-              <option value="5">5 stars</option>
             </select>
           </label>
         </div>
@@ -133,7 +115,6 @@ const Items = () => {
                 <p className="item-status">
                   {item.status === "Available" ? "Available" : "Not Available"}
                 </p>
-                <p className="item-rating">⭐ {item.rating || 5}</p>
                 <Link to={`/useritem-details/${item.id}`} className="item-details-btn">
                   View Details
                 </Link>

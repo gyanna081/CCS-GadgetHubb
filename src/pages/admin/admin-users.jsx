@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/CCSGadgetHub1.png";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { db } from "../../firebaseconfig";
 
 const AdminManageUsers = () => {
   const location = useLocation();
@@ -12,35 +14,43 @@ const AdminManageUsers = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
 
   useEffect(() => {
-    const dummyUsers = [
-      { id: 1, name: "Mica Ella Obeso", email: "micaella.obeso@cit.edu", role: "Student" },
-      { id: 2, name: "John Smith", email: "john.smith@cit.edu", role: "Student" },
-      { id: 3, name: "Admin User", email: "admin@cit.edu", role: "Admin" },
-    ];
-    setUsers(dummyUsers);
+    fetchUsers();
   }, []);
 
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleView = (id) => {
-    navigate(`/view-user/${id}`);
+  const fetchUsers = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "users"));
+      const userList = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setUsers(userList);
+    } catch (error) {
+      console.error("Error fetching users from Firebase:", error);
+    }
   };
 
-  const handleEdit = (id) => {
-    navigate(`/edit-user/${id}`);
-  };
+  const filteredUsers = users.filter((user) => {
+    const fullName = `${user.firstName || ""} ${user.lastName || ""}`.toLowerCase();
+    return (
+      fullName.includes(searchTerm.toLowerCase()) ||
+      (user.email || "").toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
+  const handleView = (id) => navigate(`/view-user/${id}`);
 
   const handleDelete = (id) => {
     setSelectedUserId(id);
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    setUsers(users.filter((user) => user.id !== selectedUserId));
-    setShowDeleteModal(false);
+  const confirmDelete = async () => {
+    try {
+      await deleteDoc(doc(db, "users", selectedUserId));
+      setUsers(users.filter((user) => user.id !== selectedUserId));
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      alert("Failed to delete user.");
+    }
   };
 
   return (
@@ -73,9 +83,8 @@ const AdminManageUsers = () => {
       <div className="admin-dashboard-container">
         <h1 className="admin-welcome">Manage Users</h1>
 
-        {/* Filters Row */}
+        {/* Filters */}
         <div className="admin-filters-row">
-          <Link to="/add-user" className="add-item-btn">Add New User</Link>
           <input
             type="text"
             placeholder="Search by name or email..."
@@ -85,7 +94,7 @@ const AdminManageUsers = () => {
           />
         </div>
 
-        {/* Users Table */}
+        {/* User Table */}
         <table className="admin-users-table">
           <thead>
             <tr>
@@ -98,13 +107,16 @@ const AdminManageUsers = () => {
           <tbody>
             {filteredUsers.map((user) => (
               <tr key={user.id}>
-                <td>{user.name}</td>
+                <td>{user.firstName} {user.lastName}</td>
                 <td>{user.email}</td>
                 <td>{user.role}</td>
                 <td>
-                  <button className="view-btn" onClick={() => handleView(user.id)}>View</button>
-                  <button className="edit-btn" onClick={() => handleEdit(user.id)}>Edit</button>
-                  <button className="delete-btn" onClick={() => handleDelete(user.id)}>Delete</button>
+                  {user.role !== "admin" && (
+                    <>
+                      <button className="view-btn" onClick={() => handleView(user.id)}>View</button>
+                      <button className="delete-btn" onClick={() => handleDelete(user.id)}>Delete</button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}
@@ -112,7 +124,7 @@ const AdminManageUsers = () => {
         </table>
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       {showDeleteModal && (
         <div className="admin-user-modal-overlay">
           <div className="admin-user-modal">

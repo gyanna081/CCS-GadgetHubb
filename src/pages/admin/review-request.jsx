@@ -1,22 +1,51 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/CCSGadgetHub1.png";
+import { db } from "../../firebaseconfig";
+import { doc, getDoc } from "firebase/firestore";
 
 const AdminRequestReview = () => {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const requestDetails = {
-    id,
-    borrower: "Jane Doe",
-    item: "Dell Laptop",
-    requestCreatedDate: "April 18, 2025", // Added request creation date
-    borrowDate: "April 22, 2025",          // Adjusted field names
-    borrowTime: "9:00 AM - 3:00 PM",
-    reason: "Project Presentation for final grade submission.",
-    status: "Pending",
-  };
+  const [request, setRequest] = useState(null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchRequestAndUser = async () => {
+      try {
+        const docRef = doc(db, "borrowRequests", id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const requestData = { id: docSnap.id, ...docSnap.data() };
+          setRequest(requestData);
+
+          // fetch the user details using userId
+          if (requestData.userId) {
+            const userRef = doc(db, "users", requestData.userId);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+              setUser(userSnap.data());
+            }
+          }
+        } else {
+          setError("Request not found.");
+        }
+      } catch (err) {
+        console.error("Error fetching request:", err);
+        setError("Failed to load request.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchRequestAndUser();
+    else setError("Invalid request ID.");
+  }, [id]);
 
   const handleApprove = () => {
     alert("Request Approved!");
@@ -43,7 +72,11 @@ const AdminRequestReview = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={location.pathname === link.to ? "navbar-link active-link" : "navbar-link"}
+              className={
+                location.pathname === link.to
+                  ? "navbar-link active-link"
+                  : "navbar-link"
+              }
             >
               {link.label}
             </Link>
@@ -58,32 +91,38 @@ const AdminRequestReview = () => {
       <div className="admin-dashboard-container">
         <Link to="/admin-requests" className="back-arrow">←</Link>
 
-        <div className="request-details-box">
-          <h2>Review Request Details</h2>
+        {loading ? (
+          <p>Loading request...</p>
+        ) : error ? (
+          <p>{error}</p>
+        ) : (
+          <div className="request-details-box">
+            <h2>Review Request Details</h2>
 
-          {/* Request Timeline */}
-          <h3 className="section-header">Request Timeline</h3>
-          <p><strong>Date Request Was Created:</strong> {requestDetails.requestCreatedDate}</p>
+            <h3 className="section-header">Request Timeline</h3>
+            <p>
+              <strong>Date Request Was Created:</strong>{" "}
+              {request.createdAt?.seconds
+                ? new Date(request.createdAt.seconds * 1000).toLocaleString()
+                : "N/A"}
+            </p>
 
-          {/* Borrowing Schedule */}
-          <h3 className="section-header">Borrowing Schedule</h3>
-          <p><strong>Scheduled Borrow Date:</strong> {requestDetails.borrowDate}</p>
-          <p><strong>Scheduled Time Slot:</strong> {requestDetails.borrowTime}</p>
+            <h3 className="section-header">Borrowing Schedule</h3>
+            <p><strong>Scheduled Borrow Date:</strong> {request.borrowDate}</p>
+            <p><strong>Scheduled Time Slot:</strong> {request.timeRange || `${request.startTime} - ${request.returnTime}`}</p>
 
-          {/* Request Information */}
-          <h3 className="section-header">Request Information</h3>
-          <p><strong>Borrower Name:</strong> {requestDetails.borrower}</p>
-          <p><strong>Item Requested:</strong> {requestDetails.item}</p>
-          <p><strong>Reason for Borrowing:</strong> {requestDetails.reason}</p>
+            <h3 className="section-header">Request Information</h3>
+            <p><strong>Borrower Name:</strong> {user ? `${user.firstName} ${user.lastName}` : request.userName || "N/A"}</p>
+            <p><strong>Item Requested:</strong> {request.itemName}</p>
+            <p><strong>Reason for Borrowing:</strong> {request.reason}</p>
+            <p><strong>Current Status:</strong> {request.status}</p>
 
-          <p><strong>Current Status:</strong> {requestDetails.status}</p>
-
-          {/* Approve and Deny Buttons */}
-          <div className="request-action-btns">
-            <button className="approve-btn" onClick={handleApprove}>Approve</button>
-            <button className="deny-btn" onClick={handleDeny}>Deny</button>
+            <div className="request-action-btns">
+              <button className="approve-btn" onClick={handleApprove}>Approve</button>
+              <button className="deny-btn" onClick={handleDeny}>Deny</button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

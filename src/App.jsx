@@ -17,7 +17,7 @@ import ViewRequest from "./pages/user/view-request";
 import AdminDashboard from "./pages/AdminDashboard";
 import ManageItems from "./pages/admin/admin-items";
 import AddItem from "./pages/admin/add-item";
-import ViewItem from "./pages/admin/view-item";
+import ViewItem from "./pages/admin/view-item"; // ✅ Uses :id param now
 import EditItem from "./pages/admin/edit-item";
 import Requests from "./pages/admin/admin-requests";
 import ReviewRequest from "./pages/admin/review-request";
@@ -46,10 +46,10 @@ function App() {
         <Route path="/view-request/:id" element={<ViewRequest />} />
 
         {/* Admin Routes */}
-        <Route path="/admindashboard" element={<AdminDashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/admin-items" element={<ManageItems />} />
         <Route path="/add-item" element={<AddItem />} />
-        <Route path="/view-item/:id" element={<ViewItem />} />
+        <Route path="/view-item/:id" element={<ViewItem />} /> {/* ✅ Matches useParams().id */}
         <Route path="/edit-item/:id" element={<EditItem />} />
         <Route path="/admin-requests" element={<Requests />} />
         <Route path="/review-request/:id" element={<ReviewRequest />} />

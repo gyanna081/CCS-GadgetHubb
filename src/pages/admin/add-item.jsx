@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 import logo from "../../assets/CCSGadgetHub1.png";
 
 const AddItem = () => {
@@ -8,29 +9,48 @@ const AddItem = () => {
 
   const [itemName, setItemName] = useState("");
   const [itemDescription, setItemDescription] = useState("");
-  const [itemCondition, setItemCondition] = useState("New");
+  const [itemCondition, setItemCondition] = useState("Good");
   const [itemImage, setItemImage] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [error, setError] = useState("");
 
   const handleImageChange = (e) => {
     setItemImage(e.target.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({
-      itemName,
-      itemDescription,
-      itemCondition,
-      itemImage,
-    });
+    setError("");
 
-    setShowSuccessModal(true);
+    if (!itemName || !itemDescription || !itemCondition) {
+      setError("All fields are required.");
+      return;
+    }
 
-    setTimeout(() => {
-      setShowSuccessModal(false);
-      navigate("/admin-items");
-    }, 5000);
+    const formData = new FormData();
+    formData.append("name", itemName);
+    formData.append("description", itemDescription);
+    formData.append("condition", itemCondition);
+    if (itemImage) {
+      formData.append("image", itemImage);
+    }
+
+    try {
+      await axios.post("http://localhost:8080/api/items", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setShowSuccessModal(true);
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        navigate("/admin-items");
+      }, 3000);
+    } catch (err) {
+      console.error("Error adding item:", err);
+      setError("Failed to add item. Please try again.");
+    }
   };
 
   return (
@@ -48,24 +68,34 @@ const AddItem = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={location.pathname === link.to ? "navbar-link active-link" : "navbar-link"}
+              className={
+                location.pathname === link.to
+                  ? "navbar-link active-link"
+                  : "navbar-link"
+              }
             >
               {link.label}
             </Link>
           ))}
         </nav>
         <div style={{ marginLeft: "auto" }}>
-          <Link to="/" className="logout-link">Log Out</Link>
+          <Link to="/" className="logout-link">
+            Log Out
+          </Link>
         </div>
       </div>
 
       <div style={{ width: "100%", maxWidth: "800px", margin: "0 auto" }}>
-        <Link to="/admin-items" className="back-arrow">←</Link>
+        <Link to="/admin-items" className="back-arrow">
+          ←
+        </Link>
       </div>
 
       {/* Content */}
       <div className="add-item-container">
         <h2>Add New Item</h2>
+
+        {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
 
         <form className="add-item-form" onSubmit={handleSubmit}>
           <label>
@@ -103,14 +133,12 @@ const AddItem = () => {
 
           <label>
             Upload Image:
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
+            <input type="file" accept="image/*" onChange={handleImageChange} />
           </label>
 
-          <button type="submit" className="submit-btn">Add Item</button>
+          <button type="submit" className="submit-btn">
+            Add Item
+          </button>
         </form>
       </div>
 
@@ -120,7 +148,9 @@ const AddItem = () => {
           <div className="modal-content">
             Item added successfully!
             <div style={{ marginTop: "20px" }}>
-              <Link to="/admin-items" className="modal-link">Back to Items Page</Link>
+              <Link to="/admin-items" className="modal-link">
+                Back to Items Page
+              </Link>
             </div>
           </div>
         </div>

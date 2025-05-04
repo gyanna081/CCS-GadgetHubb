@@ -1,57 +1,54 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/CCSGadgetHub1.png";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { db } from "../../firebaseconfig";
 
 const AdminManageItems = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const navLinks = [
-    { label: "Dashboard", to: "/admin-dashboard" },
-    { label: "Manage Items", to: "/admin-items" },
-    { label: "Requests", to: "/admin-requests" },
-    { label: "Manage Users", to: "/admin-users" },
-  ];
-
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("available");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [items, setItems] = useState([]);
-
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
 
   useEffect(() => {
-    const dummyItems = [
-      { id: 1, name: "Laptop 1", status: "Available", rating: 5, image: "https://via.placeholder.com/100" },
-      { id: 2, name: "Macbook Air", status: "Borrowed", rating: 4, image: "https://via.placeholder.com/100" }
-    ];
-    setItems(dummyItems);
+    const fetchItems = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "items"));
+        const itemList = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setItems(itemList);
+      } catch (error) {
+        console.error("Error fetching items:", error);
+      }
+    };
+
+    fetchItems();
   }, []);
 
-  const filteredItems = items.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || item.status.toLowerCase() === statusFilter;
+  const filteredItems = items.filter((item) => {
+    const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || item.status?.toLowerCase() === statusFilter;
     return matchesSearch && matchesStatus;
   });
-
-  const handleCardClick = (e, id) => {
-    if (e.target.tagName.toLowerCase() === "button") return;
-    navigate(`/view-item/${id}`);
-  };
-
-  const handleEdit = (id) => {
-    navigate(`/edit-item/${id}`);
-  };
 
   const handleDelete = (id) => {
     setItemToDelete(id);
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    setItems(prev => prev.filter(item => item.id !== itemToDelete));
-    setShowDeleteModal(false);
-    setItemToDelete(null);
+  const confirmDelete = async () => {
+    try {
+      await deleteDoc(doc(db, "items", itemToDelete));
+      setItems((prev) => prev.filter((item) => item.id !== itemToDelete));
+      setShowDeleteModal(false);
+      setItemToDelete(null);
+    } catch (err) {
+      console.error("Failed to delete item:", err);
+    }
   };
 
   return (
@@ -60,7 +57,12 @@ const AdminManageItems = () => {
       <div className="navbar">
         <img src={logo} alt="CCS Gadget Hub Logo" />
         <nav>
-          {navLinks.map((link) => (
+          {[
+            { label: "Dashboard", to: "/admin-dashboard" },
+            { label: "Manage Items", to: "/admin-items" },
+            { label: "Requests", to: "/admin-requests" },
+            { label: "Manage Users", to: "/admin-users" },
+          ].map((link) => (
             <Link
               key={link.to}
               to={link.to}
@@ -81,9 +83,7 @@ const AdminManageItems = () => {
 
         {/* Filters */}
         <div className="admin-filters-row">
-          <Link to="/add-item" className="add-item-btn">
-            Add New Item
-          </Link>
+          <Link to="/add-item" className="add-item-btn">Add New Item</Link>
           <input
             type="text"
             placeholder="Search by item name..."
@@ -102,47 +102,50 @@ const AdminManageItems = () => {
           </select>
         </div>
 
-        {/* Items Grid */}
+        {/* Item Cards */}
         <div className="admin-items-grid">
-          {filteredItems.map(item => (
-            <div
-              key={item.id}
-              className="admin-item-card"
-              onClick={(e) => handleCardClick(e, item.id)}
-            >
-              <img src={item.image} alt={item.name} className="admin-item-img" />
-              <h3>{item.name}</h3>
-              <p className={`item-status ${item.status.toLowerCase()}`}>
+          {filteredItems.map((item) => (
+            <div key={item.id} className="admin-item-card">
+              <img
+                src={
+                  item.imagePath?.startsWith("http")
+                    ? item.imagePath
+                    : `http://localhost:8080/${item.imagePath}`
+                }
+                alt={item.name}
+                className="admin-item-img"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "https://via.placeholder.com/150";
+                }}
+              />
+              <h3>{item.name || "Unnamed Item"}</h3>
+              <p className={`item-status ${item.status?.toLowerCase()}`}>
                 {item.status === "Borrowed" ? "Not Available" : item.status}
               </p>
-
-              <div className="item-rating">
-                <span className="star-icon">⭐</span>
-                <span className="rating-number">{item.rating}</span>
-              </div>
-
+              
               <div className="admin-item-buttons">
-                <button className="edit-btn" onClick={() => handleEdit(item.id)}>Edit</button>
-                <button className="delete-btn" onClick={() => handleDelete(item.id)}>Delete</button>
+                <button onClick={() => navigate(`/view-item/${item.id}`)} className="view-btn">View</button>
+                <button onClick={() => navigate(`/edit-item/${item.id}`)} className="edit-btn">Edit</button>
+                <button onClick={() => handleDelete(item.id)} className="delete-btn">Delete</button>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       {showDeleteModal && (
-  <div className="admin-item-modal-overlay">
-    <div className="admin-item-modal">
-      <p className="admin-item-modal-message">Are you sure you want to delete this item?</p>
-      <div className="admin-item-modal-buttons">
-        <button className="admin-item-yes-btn" onClick={confirmDelete}>Yes</button>
-        <button className="admin-item-no-btn" onClick={() => setShowDeleteModal(false)}>No</button>
-      </div>
-    </div>
-  </div>
-)}
-
+        <div className="admin-item-modal-overlay">
+          <div className="admin-item-modal">
+            <p className="admin-item-modal-message">Are you sure you want to delete this item?</p>
+            <div className="admin-item-modal-buttons">
+              <button className="admin-item-yes-btn" onClick={confirmDelete}>Yes</button>
+              <button className="admin-item-no-btn" onClick={() => setShowDeleteModal(false)}>No</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

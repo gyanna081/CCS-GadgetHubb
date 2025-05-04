@@ -16,7 +16,7 @@ const Login = () => {
       const res = await axios.get(`http://localhost:8080/api/sync/get-by-uid?uid=${uid}`);
       const user = res.data;
       if (user.role === "admin") {
-        navigate("/admindashboard");
+        navigate("/admin-dashboard");
       } else {
         navigate("/dashboard");
       }

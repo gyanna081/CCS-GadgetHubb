@@ -1,32 +1,62 @@
-import React from "react";
-import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useParams, useLocation } from "react-router-dom";
 import logo from "../../assets/CCSGadgetHub1.png";
+import { db } from "../../firebaseconfig";
+import { doc, getDoc } from "firebase/firestore";
 
 const AdminViewItem = () => {
+  const { id } = useParams(); // Now matches :id in route
   const location = useLocation();
-  const navigate = useNavigate();
-  const { id } = useParams();
+  const [item, setItem] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  // Dummy Data for now
-  const dummyItems = [
-    { id: "1", name: "Dell Laptop", description: "High performance laptop", condition: "Good", status: "Available", image: "https://via.placeholder.com/150" },
-    { id: "2", name: "Macbook Air", description: "Lightweight and portable", condition: "New", status: "Borrowed", image: "https://via.placeholder.com/150" }
-  ];
+  useEffect(() => {
+    const fetchItem = async () => {
+      if (!id) {
+        setError("Invalid item ID.");
+        setLoading(false);
+        return;
+      }
 
-  const item = dummyItems.find((i) => i.id === id);
+      try {
+        const itemRef = doc(db, "items", id);
+        const itemSnap = await getDoc(itemRef);
 
-  if (!item) {
+        if (itemSnap.exists()) {
+          setItem({ id: itemSnap.id, ...itemSnap.data() });
+        } else {
+          setError("Item not found.");
+        }
+      } catch (err) {
+        console.error("Error fetching item:", err);
+        setError("Failed to load item.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItem();
+  }, [id]);
+
+  if (loading) {
     return (
-      <div className="dashboard-container">
-        <p>Item not found.</p>
-        <Link to="/admin-items" className="back-arrow">← Back to Items</Link>
+      <div className="admin-dashboard-container">
+        <p>Loading item...</p>
       </div>
     );
   }
 
-  const handleEdit = () => {
-    navigate(`/edit-item/${item.id}`);
-  };
+  if (error || !item) {
+    return (
+      <div className="admin-dashboard-container">
+        <p>{error || "Item not found."}</p>
+        <Link to="/admin-items" className="back-arrow">
+          ← Back to Items
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-dashboard">
@@ -43,33 +73,54 @@ const AdminViewItem = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={location.pathname === link.to ? "navbar-link active-link" : "navbar-link"}
+              className={
+                location.pathname === link.to
+                  ? "navbar-link active-link"
+                  : "navbar-link"
+              }
             >
               {link.label}
             </Link>
           ))}
         </nav>
         <div style={{ marginLeft: "auto" }}>
-          <Link to="/" className="logout-link">Log Out</Link>
+          <Link to="/" className="logout-link">
+            Log Out
+          </Link>
         </div>
       </div>
 
       {/* Content */}
       <div className="admin-dashboard-container">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-          <Link to="/admin-items" className="back-arrow">←</Link>
-          <button className="edit-btn" onClick={handleEdit}>Edit Item</button>
+        <div style={{ marginBottom: "20px" }}>
+          <Link to="/admin-items" className="back-arrow">
+            ← Back to Items
+          </Link>
         </div>
 
         <div className="view-item-box">
-          <img src={item.image} alt={item.name} className="view-item-image" />
+          <img
+            src={
+              item.imagePath?.startsWith("http")
+                ? item.imagePath
+                : `http://localhost:8080/${item.imagePath}`
+            }
+            alt={item.name}
+            className="view-item-image"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://via.placeholder.com/150";
+            }}
+          />
           <h2>{item.name}</h2>
-          <p><strong>Description:</strong> {item.description}</p>
-          <p><strong>Condition:</strong> {item.condition}</p>
-          <p><strong>Status:</strong>
-            <span className={`status ${item.status.toLowerCase()}`}>
-              {item.status === "Borrowed" ? "Not Available" : item.status}
-            </span>
+          <p>
+            <strong>Description:</strong> {item.description}
+          </p>
+          <p>
+            <strong>Condition:</strong> {item.condition}
+          </p>
+          <p>
+            <strong>Status:</strong> {item.status}
           </p>
         </div>
       </div>

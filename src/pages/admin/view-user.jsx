@@ -1,53 +1,55 @@
-import React from "react";
-import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useParams, useLocation } from "react-router-dom";
 import logo from "../../assets/CCSGadgetHub1.png";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebaseconfig";
 
 const ViewUser = () => {
   const { id } = useParams();
   const location = useLocation();
-  const navigate = useNavigate();
 
-  const dummyUsers = [
-    {
-      id: "1",
-      name: "Mica Ella Obeso",
-      email: "micaella.obeso@cit.edu",
-      role: "Student",
-      yearLevel: "4th Year",
-      course: "BSIT",
-    },
-    {
-      id: "2",
-      name: "John Smith",
-      email: "john.smith@cit.edu",
-      role: "Student",
-      yearLevel: "3rd Year",
-      course: "BSCS",
-    },
-    {
-      id: "3",
-      name: "Admin User",
-      email: "admin@cit.edu",
-      role: "Admin",
-      yearLevel: "",
-      course: "",
-    },
-  ];
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const user = dummyUsers.find((u) => u.id === id);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userRef = doc(db, "users", id);
+        const userSnap = await getDoc(userRef);
 
-  if (!user) {
+        if (userSnap.exists()) {
+          setUser({ id: userSnap.id, ...userSnap.data() });
+        } else {
+          setError("User not found.");
+        }
+      } catch (err) {
+        console.error("Error fetching user:", err);
+        setError("Failed to load user.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [id]);
+
+  if (loading) {
     return (
       <div className="admin-dashboard-container">
-        <p>User not found.</p>
-        <Link to="/admin-users" className="back-arrow">←</Link>
+        <p>Loading user data...</p>
       </div>
     );
   }
 
-  const handleEdit = () => {
-    navigate(`/edit-user/${user.id}`);
-  };
+  if (error || !user) {
+    return (
+      <div className="admin-dashboard-container">
+        <p>{error || "User not found."}</p>
+        <Link to="/admin-users" className="back-arrow">←</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-dashboard">
@@ -77,22 +79,21 @@ const ViewUser = () => {
 
       {/* Content */}
       <div className="admin-dashboard-container">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: "800px", margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "center", maxWidth: "800px", margin: "0 auto" }}>
           <Link to="/admin-users" className="back-arrow">←</Link>
-          <button className="edit-user-btn" onClick={handleEdit}>Edit User</button>
         </div>
 
         <div className="view-user-box">
           <h2 className="view-user-title">User Details</h2>
 
-          <p><strong>Full Name:</strong> {user.name}</p>
+          <p><strong>Full Name:</strong> {user.firstName} {user.lastName}</p>
           <p><strong>Email:</strong> {user.email}</p>
           <p><strong>Role:</strong> {user.role}</p>
 
           {user.role === "Student" && (
             <>
-              <p><strong>Year Level:</strong> {user.yearLevel}</p>
-              <p><strong>Course:</strong> {user.course}</p>
+              <p><strong>Year Level:</strong> {user.yearLevel || "N/A"}</p>
+              <p><strong>Course:</strong> {user.course || "N/A"}</p>
             </>
           )}
         </div>

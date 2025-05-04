@@ -1,11 +1,73 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/CCSGadgetHub1.png";
 import "../../admin.css";
+import { db } from "../../firebaseconfig";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit
+} from "firebase/firestore";
 
 const AdminDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [totalItems, setTotalItems] = useState(0);
+  const [approvedCount, setApprovedCount] = useState(0);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [returnedCount, setReturnedCount] = useState(0);
+  const [recentActivities, setRecentActivities] = useState([]);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const itemsSnap = await getDocs(collection(db, "items"));
+        setTotalItems(itemsSnap.size);
+
+        const reqRef = collection(db, "borrowRequests");
+
+        const approvedSnap = await getDocs(
+          query(reqRef, where("status", "==", "Approved"))
+        );
+        setApprovedCount(approvedSnap.size);
+
+        const pendingSnap = await getDocs(
+          query(reqRef, where("status", "==", "Pending"))
+        );
+        const pendingList = pendingSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setPendingRequests(pendingList);
+
+        const returnedSnap = await getDocs(
+          query(reqRef, where("status", "==", "Returned"))
+        );
+        setReturnedCount(returnedSnap.size);
+
+        const activitySnap = await getDocs(
+          query(reqRef, orderBy("requestDate", "desc"), limit(5))
+        );
+        const recent = activitySnap.docs.map((doc) => {
+          const d = doc.data();
+          return {
+            id: doc.id,
+            text: `${d.borrowerName || "User"} ${d.status?.toLowerCase()} "${d.itemName || "item"}"`,
+            date: d.requestDate || "N/A"
+          };
+        });
+        setRecentActivities(recent);
+      } catch (err) {
+        console.error("Dashboard data fetch error:", err);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   const navLinks = [
     { label: "Dashboard", to: "/admin-dashboard" },
@@ -14,23 +76,12 @@ const AdminDashboard = () => {
     { label: "Manage Users", to: "/admin-users" },
   ];
 
-  const recentActivities = [
-    { id: 1, text: "Jane Doe borrowed \"Dell Laptop\"", date: "Apr 22" },
-    { id: 2, text: "Mike returned \"Macbook Air\"", date: "Apr 21" },
-    { id: 3, text: "Kyle canceled \"Tablet\"", date: "Apr 20" },
-  ];
-
-  const [pendingRequests] = useState([
-    { id: 1, item: "Dell Laptop", user: "Jane Doe", date: "Apr 22" },
-    { id: 2, item: "Macbook Air", user: "John Smith", date: "Apr 21" },
-  ]);
-
   const handleCardClick = (path) => {
     navigate(path);
   };
 
   const handleReview = (e, id) => {
-    e.stopPropagation(); // Stop card click
+    e.stopPropagation();
     navigate(`/review-request/${id}`);
   };
 
@@ -55,26 +106,27 @@ const AdminDashboard = () => {
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="admin-dashboard-container">
         <h1 className="admin-welcome">Welcome back, Admin!</h1>
         <p className="admin-subtext">Here’s an overview of recent gadget hub activity.</p>
 
-        {/* Dashboard Cards */}
+        {/* Cards */}
         <div className="admin-cards">
           <div className="admin-card clickable" onClick={() => handleCardClick("/admin-items")}>
-            <h3>20</h3>
+            <h3>{totalItems}</h3>
             <p>Total Items</p>
           </div>
           <div className="admin-card clickable" onClick={() => handleCardClick("/admin-requests")}>
-            <h3>10</h3>
+            <h3>{approvedCount}</h3>
             <p>Approved Requests</p>
           </div>
           <div className="admin-card clickable" onClick={() => handleCardClick("/admin-requests")}>
-            <h3>3</h3>
+            <h3>{pendingRequests.length}</h3>
             <p>Pending Requests</p>
           </div>
           <div className="admin-card clickable" onClick={() => handleCardClick("/admin-requests")}>
-            <h3>2</h3>
+            <h3>{returnedCount}</h3>
             <p>Returned</p>
           </div>
         </div>
@@ -92,16 +144,18 @@ const AdminDashboard = () => {
             </ul>
           </div>
 
-          {/* Pending Approvals */}
+          {/* Pending Approval */}
           <div className="admin-pending-box clickable" onClick={() => handleCardClick("/admin-requests")}>
             <h3>Pending Approvals</h3>
             {pendingRequests.length > 0 ? (
               pendingRequests.map((req) => (
                 <div key={req.id} className="pending-request">
-                  <p><strong>{req.item}</strong> - {req.user}</p>
-                  <span>{req.date}</span>
+                  <p><strong>{req.itemName}</strong> - {req.borrowerName}</p>
+                  <span>{req.requestDate}</span>
                   <div className="review-btn-row">
-                    <button className="review-request-btn" onClick={(e) => handleReview(e, req.id)}>Review Request</button>
+                    <button className="review-request-btn" onClick={(e) => handleReview(e, req.id)}>
+                      Review Request
+                    </button>
                   </div>
                 </div>
               ))

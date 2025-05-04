@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { db } from "../../firebaseconfig";
+import { db, auth } from "../../firebaseconfig";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { auth } from "../../firebaseconfig";
 import logo from "../../assets/CCSGadgetHub1.png";
 
 const MyRequests = () => {
@@ -40,14 +39,19 @@ const MyRequests = () => {
 
   const filteredRequests = requests.filter((req) => {
     const matchesSearch = req.itemName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || req.status.toLowerCase() === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" || req.status.toLowerCase() === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const formatDate = (timestamp) => {
     if (!timestamp) return "-";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+    return date.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   const formatDateTime = (timestamp) => {
@@ -71,7 +75,9 @@ const MyRequests = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={location.pathname === link.to ? "navbar-link active-link" : "navbar-link"}
+              className={
+                location.pathname === link.to ? "navbar-link active-link" : "navbar-link"
+              }
             >
               {link.label}
             </Link>
@@ -117,10 +123,20 @@ const MyRequests = () => {
               <tr key={req.id}>
                 <td>{req.itemName}</td>
                 <td>{formatDate(req.borrowDate)}</td>
-                <td><span className={`status-badge ${req.status.toLowerCase()}`}>{req.status}</span></td>
-                <td>{req.status.toLowerCase() === "returned" ? formatDateTime(req.returnDate) : "-"}</td>
                 <td>
-                  <button className="view-btn" onClick={() => navigate(`/view-request/${req.id}`)}>View</button>
+                  <span className={`status-badge ${req.status.toLowerCase()}`}>
+                    {req.status}
+                  </span>
+                </td>
+                <td>{req.status.toLowerCase() === "returned" ? req.returnTime : "-"}</td>
+
+                <td>
+                  <button
+                    className="view-btn"
+                    onClick={() => navigate(`/view-request/${req.id}`)}
+                  >
+                    View
+                  </button>
                 </td>
               </tr>
             ))}
