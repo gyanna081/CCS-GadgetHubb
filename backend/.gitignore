@@ -33,4 +33,4 @@ build/
 .vscode/
 
 # Firebase admin secret key
-backend/src/main/resources/*.json
+#backend/src/main/resources/*.json
