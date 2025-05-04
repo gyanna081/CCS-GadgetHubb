@@ -28,16 +28,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Correct: Allow only localhost:3000 (or 5173 if you use Vite)
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173"));
-        
+    
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:3000",                      // for local dev
+            "http://localhost:5173",                      // for Vite dev
+            "https://ccs-gadgethubb-frontend.onrender.com", // your deployed frontend
+            "https://ccs-gadgethubb.onrender.com"         // if needed (in case backend calls itself)
+        ));
+    
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
-
+    
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-}
+}    
