@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,12 +20,9 @@ import com.example.GadgetHub.model.BorrowRequest;
 import com.example.GadgetHub.service.BorrowRequestService;
 
 @RestController
-@RequestMapping("/api/requests")
-@CrossOrigin(allowCredentials = "true") // Removed hardcoded origin
+@RequestMapping("/api/requests")  // Changed from "/api/borrow/requests" to match frontend
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class BorrowRequestController {
-
-    @Value("${app.frontend.url}")
-    private String frontendUrl;
 
     private final BorrowRequestService borrowRequestService;
 
