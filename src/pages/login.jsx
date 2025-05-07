@@ -3,7 +3,7 @@ import { auth, provider } from "../firebaseconfig";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import logo from "../assets/CCSGadgetHub.png"; // adjust path if needed
+import logo from "../assets/CCSGadgetHub.png";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -11,9 +11,14 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const redirectBasedOnRole = async (uid) => {
+  const redirectBasedOnRole = async (uid, token) => {
     try {
-      const res = await axios.get(`https://ccs-gadgethubb.onrender.com/api/sync/get-by-uid?uid=${uid}`);
+      const res = await axios.get(`https://ccs-gadgethubb.onrender.com/api/sync/get-by-uid?uid=${uid}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       const user = res.data;
       if (user.role === "admin") {
         navigate("/admin-dashboard");
@@ -29,30 +34,36 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      const token = await user.getIdToken(); // Get the JWT token
 
       const displayName = user.displayName || "Unnamed User";
       const nameParts = displayName.split(" ");
       const firstName = nameParts[0] || "Unnamed";
       const lastName = nameParts.slice(1).join(" ") || "";
 
-      await axios.post("https://ccs-gadgethubb.onrender.com/api/sync/user", {
-        uid: user.uid,
-        email: user.email,
-        firstName,
-        lastName,
-      });
+      await axios.post(
+        "https://ccs-gadgethubb.onrender.com/api/sync/user",
+        {
+          uid: user.uid,
+          email: user.email,
+          firstName,
+          lastName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      redirectBasedOnRole(user.uid);
+      redirectBasedOnRole(user.uid, token);
     } catch (err) {
       console.error("Login error:", err);
-      if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found") {
-        setError("Invalid email or password");
-      } else {
-        setError(typeof err === "string" ? err : err.message || "Login failed");
-      }
+      setError(err.response?.data?.error || "Login failed. Please try again.");
     }
   };
 
@@ -60,23 +71,32 @@ const Login = () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      const token = await user.getIdToken(); // Get the JWT token
 
       const displayName = user.displayName || "Unnamed User";
       const nameParts = displayName.split(" ");
       const firstName = nameParts[0] || "Unnamed";
       const lastName = nameParts.slice(1).join(" ") || "";
 
-      await axios.post("https://ccs-gadgethubb.onrender.com/api/sync/user", {
-        uid: user.uid,
-        email: user.email,
-        firstName,
-        lastName,
-      });
+      await axios.post(
+        "https://ccs-gadgethubb.onrender.com/api/sync/user",
+        {
+          uid: user.uid,
+          email: user.email,
+          firstName,
+          lastName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      redirectBasedOnRole(user.uid);
+      redirectBasedOnRole(user.uid, token);
     } catch (err) {
       console.error("Google login error:", err);
-      setError(typeof err === "string" ? err : err.message || "Google Sign-In failed");
+      setError(err.response?.data?.error || "Google Sign-In failed.");
     }
   };
 
