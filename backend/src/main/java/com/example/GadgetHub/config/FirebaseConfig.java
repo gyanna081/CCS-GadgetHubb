@@ -20,10 +20,12 @@ public class FirebaseConfig {
     public void initializeFirebase() {
         try {
             String firebaseConfigJson = System.getenv("FIREBASE_CONFIG_JSON");
+if (firebaseConfigJson == null) {
+    System.err.println("❌ Environment variable FIREBASE_CONFIG_JSON is not set");
+} else {
+    System.out.println("✅ Environment variable length: " + firebaseConfigJson.length());
+}
 
-            if (firebaseConfigJson == null || firebaseConfigJson.isEmpty()) {
-                throw new IllegalStateException("❌ FIREBASE_CONFIG_JSON environment variable is not set or empty");
-            }
 
             InputStream serviceAccount = new ByteArrayInputStream(firebaseConfigJson.getBytes(StandardCharsets.UTF_8));
 
