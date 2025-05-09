@@ -130,7 +130,7 @@ const Login = () => {
         </button>
 
         <div className="login-register">
-          No account yet? <Link to="/signup">Register here</Link>
+          No account yet? <Link to="/register">Register here</Link>
         </div>
       </form>
     </div>
