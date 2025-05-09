@@ -7,7 +7,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import logo from "../../assets/CCSGadgetHub1.png";
 
 const navLinks = [
-  { label: "Dashboard", to: "/userdashboard" },
+  { label: "Dashboard", to: "/dashboard" },
   { label: "Items", to: "/useritems" },
   { label: "My Requests", to: "/my-requests" },
   { label: "Profile", to: "/userprofile" },
