@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { collection, getDocs, query, orderBy, limit, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, limit, doc, getDoc, where } from "firebase/firestore";
 import { auth, db } from "../../firebaseconfig";
 import { signOut } from "firebase/auth";
 import logo from "../../assets/CCSGadgetHub1.png";
@@ -11,6 +11,11 @@ const Dashboard = () => {
 
   const [items, setItems] = useState([]);
   const [userData, setUserData] = useState(null);
+  const [summaryData, setSummaryData] = useState({
+    borrowedCount: 0,
+    pendingCount: 0,
+    overdueCount: 0
+  });
 
   const handleLogout = async () => {
     try {
@@ -29,35 +34,67 @@ const Dashboard = () => {
   ];
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchDashboardData = async () => {
       const currentUser = auth.currentUser;
-      if (currentUser) {
-        try {
-          const userDocRef = doc(db, "users", currentUser.uid);
-          const userSnap = await getDoc(userDocRef);
-          if (userSnap.exists()) {
-            setUserData(userSnap.data());
-          }
-        } catch (err) {
-          console.error("Error fetching user data:", err);
-        }
-      }
-    };
+      if (!currentUser) return;
 
-    const fetchItems = async () => {
       try {
+        // Fetch user data
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userDocRef);
+        if (userSnap.exists()) {
+          setUserData(userSnap.data());
+        }
+
+        // Fetch request counts
+        const requestsRef = collection(db, "borrowRequests");
+        
+        // Get borrowed items count (Approved status)
+        const borrowedQuery = query(
+          requestsRef, 
+          where("userId", "==", currentUser.uid),
+          where("status", "==", "Approved")
+        );
+        const borrowedSnap = await getDocs(borrowedQuery);
+
+        // Get pending requests count
+        const pendingQuery = query(
+          requestsRef, 
+          where("userId", "==", currentUser.uid),
+          where("status", "==", "Pending")
+        );
+        const pendingSnap = await getDocs(pendingQuery);
+
+        // Get overdue items count
+        const overdueQuery = query(
+          requestsRef,
+          where("userId", "==", currentUser.uid),
+          where("status", "==", "Overdue")
+        );
+        const overdueSnap = await getDocs(overdueQuery);
+
+        setSummaryData({
+          borrowedCount: borrowedSnap.size,
+          pendingCount: pendingSnap.size,
+          overdueCount: overdueSnap.size
+        });
+
+        // Fetch featured items
         const itemsRef = collection(db, "items");
         const q = query(itemsRef, orderBy("createdAt", "desc"), limit(3));
         const querySnapshot = await getDocs(q);
-        const fetchedItems = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const fetchedItems = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
         setItems(fetchedItems);
+
       } catch (error) {
-        console.error("Error fetching items from Firestore:", error);
+        console.error("Error fetching dashboard data:", error);
       }
     };
 
-    fetchUser();
-    fetchItems();
+    fetchDashboardData();
   }, []);
 
   return (
@@ -84,12 +121,21 @@ const Dashboard = () => {
         <h1 className="dashboard-greeting">
           Welcome back{userData?.firstName ? `, ${userData.firstName}!` : "!"}
         </h1>
-        <p className="dashboard-subtext">Here’s a quick overview of your gadget hub activity.</p>
+        <p className="dashboard-subtext">Here's a quick overview of your gadget hub activity.</p>
 
         <div className="summary-cards">
-          <div className="summary-card"><h3>3</h3><p>Items Borrowed</p></div>
-          <div className="summary-card"><h3>1</h3><p>Pending Requests</p></div>
-          <div className="summary-card"><h3>0</h3><p>Overdue</p></div>
+          <div className="summary-card">
+            <h3>{summaryData.borrowedCount}</h3>
+            <p>Items Borrowed</p>
+          </div>
+          <div className="summary-card">
+            <h3>{summaryData.pendingCount}</h3>
+            <p>Pending Requests</p>
+          </div>
+          <div className="summary-card">
+            <h3>{summaryData.overdueCount}</h3>
+            <p>Overdue</p>
+          </div>
         </div>
 
         <div className="featured-header">
