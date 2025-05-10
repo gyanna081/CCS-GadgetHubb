@@ -1,28 +1,52 @@
 package com.example.ccsgadgethub
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
+import com.example.ccsgadgethub.viewmodel.ItemViewModel
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 @Composable
-fun ProfileScreen(navController: NavController) {
+fun ProfileScreen(
+    navController: NavController,
+    itemViewModel: ItemViewModel // assumes this contains userData from backend
+) {
+    val user by itemViewModel.userData.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val coroutineScope = rememberCoroutineScope()
+
+    // Fetch data on screen open
+    DisposableEffect(Unit) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                coroutineScope.launch {
+                    itemViewModel.fetchUserData()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -31,7 +55,6 @@ fun ProfileScreen(navController: NavController) {
     ) {
         Spacer(modifier = Modifier.height(WindowInsets.statusBars.asPaddingValues().calculateTopPadding()))
 
-        // Top Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -65,7 +88,7 @@ fun ProfileScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Profile Content
+        // Profile Card
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -73,10 +96,8 @@ fun ProfileScreen(navController: NavController) {
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            // Dynamic Name and Role
             Text(
-                text = "${ProfileData.firstName} ${ProfileData.lastName}",
+                text = "${user?.firstName ?: "N/A"} ${user?.lastName ?: ""}",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp
             )
@@ -84,28 +105,25 @@ fun ProfileScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Contact Number and Email (static)
-            Text("micaella.obeso@cit.edu", color = Color.Gray, fontSize = 14.sp)
+            Text(user?.email ?: "N/A", color = Color.Gray, fontSize = 14.sp)
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Dynamic Course and Year Level
             Text(
-                text = ProfileData.course,
+                text = user?.course ?: "N/A",
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )
             Text(
-                text = ProfileData.yearLevel,
+                text = user?.year ?: "N/A",
                 color = Color.Gray,
                 fontSize = 14.sp
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ✅ Corrected Edit Profile Button (correct route "edit_profile")
             Button(
-                onClick = { navController.navigate("edit_profile") }, // ✅ fixed here
+                onClick = { navController.navigate("edit_profile") },
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
                     .height(45.dp),

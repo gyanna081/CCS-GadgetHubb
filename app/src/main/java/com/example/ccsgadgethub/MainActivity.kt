@@ -14,12 +14,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.ccsgadgethub.ui.*
-import com.example.ccsgadgethub.viewmodel.RequestViewModel
-import com.example.ccsgadgethub.ui.theme.CCSGadgetHubTheme // ✅ Fixed import
 
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
+// ✅ Correct composable imports
+import com.example.ccsgadgethub.MyRequestsScreen
+import com.example.ccsgadgethub.ItemScreen
+import com.example.ccsgadgethub.ui.theme.CCSGadgetHubTheme
+
+// ✅ ViewModels
+import com.example.ccsgadgethub.viewmodel.ItemViewModel
+import com.example.ccsgadgethub.viewmodel.RequestViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,44 +40,90 @@ class MainActivity : ComponentActivity() {
                         navController = navController,
                         startDestination = "splash"
                     ) {
-                        // Basic Screens
                         composable("splash") { SplashScreen(navController) }
                         composable("login") { LoginScreen(navController) }
                         composable("register") { RegisterScreen(navController) }
-                        composable("home") { HomeScreen(navController) }
-                        composable("items") { ItemScreen(navController) }
-                        composable("profile") { ProfileScreen(navController) }
-                        composable("edit_profile") { EditProfileScreen(navController) }
 
-                        // Dashboard Screen
-                        composable("dashboard") { DashboardScreen(navController) }
+                        composable("home") {
+                            val itemViewModel: ItemViewModel = viewModel()
+                            val requestViewModel: RequestViewModel = viewModel()
+                            HomeScreen(
+                                navController = navController,
+                                itemViewModel = itemViewModel,
+                                requestViewModel = requestViewModel
+                            )
+                        }
 
-                        // ✅ My Requests Screen
+                        composable("items") {
+                            val itemViewModel: ItemViewModel = viewModel()
+                            ItemScreen(navController, itemViewModel)
+                        }
+
+                        composable("profile") {
+                            val itemViewModel: ItemViewModel = viewModel()
+                            ProfileScreen(navController = navController, itemViewModel = itemViewModel)
+                        }
+
+                        composable("edit_profile") {
+                            val itemViewModel: ItemViewModel = viewModel()
+                            EditProfileScreen(navController, itemViewModel)
+                        }
+
+                        composable("dashboard") {
+                            val itemViewModel: ItemViewModel = viewModel()
+                            DashboardScreen(navController, itemViewModel)
+                        }
+
                         composable("my_requests") {
                             val requestViewModel: RequestViewModel = viewModel()
                             MyRequestsScreen(navController, requestViewModel)
                         }
 
-                        // Item Detail Screen
+                        // Updated to use itemId instead of itemName
                         composable(
-                            route = "item_detail/{itemName}",
-                            arguments = listOf(navArgument("itemName") { type = NavType.StringType })
+                            route = "item_detail/{itemId}",
+                            arguments = listOf(navArgument("itemId") { type = NavType.StringType })
                         ) { backStackEntry ->
-                            val itemName = backStackEntry.arguments?.getString("itemName")?.let {
-                                URLDecoder.decode(it, StandardCharsets.UTF_8.name())
-                            }
-                            ItemDetailScreen(navController, itemName)
+                            val itemId = backStackEntry.arguments?.getString("itemId") ?: ""
+                            val itemViewModel: ItemViewModel = viewModel()
+                            ItemDetailScreen(
+                                navController = navController,
+                                itemId = itemId,
+                                itemViewModel = itemViewModel
+                            )
                         }
 
-                        // Request Form Screen
+                        // Updated to use itemId for borrowing requests
+                        composable(
+                            route = "borrow_request/{itemId}",
+                            arguments = listOf(navArgument("itemId") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val itemId = backStackEntry.arguments?.getString("itemId") ?: ""
+                            val itemViewModel: ItemViewModel = viewModel()
+                            val requestViewModel: RequestViewModel = viewModel()
+                            RequestFormScreen(
+                                navController = navController,
+                                itemId = itemId,
+                                viewModel = requestViewModel,
+                                itemViewModel = itemViewModel
+                            )
+                        }
+
+                        // Keep old route for backward compatibility with updated parameters
                         composable(
                             route = "request_form/{itemName}",
                             arguments = listOf(navArgument("itemName") { type = NavType.StringType })
                         ) { backStackEntry ->
-                            val itemNameArg = backStackEntry.arguments?.getString("itemName")?.let {
-                                URLDecoder.decode(it, StandardCharsets.UTF_8.name())
-                            }
-                            RequestFormScreen(navController, itemNameArg)
+                            val itemName = backStackEntry.arguments?.getString("itemName") ?: ""
+                            val itemViewModel: ItemViewModel = viewModel()
+                            val requestViewModel: RequestViewModel = viewModel()
+                            // Use itemName as itemId for backward compatibility
+                            RequestFormScreen(
+                                navController = navController,
+                                itemId = itemName,
+                                viewModel = requestViewModel,
+                                itemViewModel = itemViewModel
+                            )
                         }
                     }
                 }

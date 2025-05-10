@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "470573412326",
+    "project_id": "ccs-gadgethub",
+    "storage_bucket": "ccs-gadgethub.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:470573412326:android:2f61f94fcc43bda40a3027",
+        "android_client_info": {
+          "package_name": "com.example.ccsgadgethub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "470573412326-gm6sufk8emrrkc2ep3f9iu8ppro499df.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArHmqZCjYg_Ov9BN2MicLT385NwlB3aZ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "470573412326-gm6sufk8emrrkc2ep3f9iu8ppro499df.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

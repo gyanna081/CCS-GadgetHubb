@@ -26,15 +26,48 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.ccsgadgethub.viewmodel.RequestViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.auth.FirebaseAuth
 import java.util.*
+import android.util.Log
+import com.example.ccsgadgethub.viewmodel.ItemViewModel
 
 @Composable
 fun RequestFormScreen(
     navController: NavController,
-    itemNameArg: String?,
-    viewModel: RequestViewModel = viewModel() // Injecting the RequestViewModel
+    itemId: String?,  // Changed from itemNameArg to itemId
+    viewModel: RequestViewModel = viewModel(),
+    itemViewModel: ItemViewModel = viewModel()
 ) {
-    var itemName by remember { mutableStateOf(itemNameArg ?: "") }
+    // Fetch items when the screen is shown
+    LaunchedEffect(Unit) {
+        Log.d("RequestFormScreen", "Fetching items for itemId: $itemId")
+        itemViewModel.fetchItems()
+        itemViewModel.fetchUserData()
+    }
+
+    // State to hold the actual item details
+    val items by itemViewModel.items.collectAsState()
+    val item = items.find { it.id == itemId }
+
+    // Debug log to check if item is found
+    LaunchedEffect(items) {
+        if (item != null) {
+            Log.d("RequestFormScreen", "Found item: ${item.name}")
+        } else {
+            Log.e("RequestFormScreen", "Item not found for ID: $itemId")
+        }
+    }
+
+    // Use item name from the found item, or empty string as fallback
+    var itemName by remember { mutableStateOf(item?.name ?: "") }
+
+    // Update itemName when item is found
+    LaunchedEffect(item) {
+        item?.let {
+            itemName = it.name
+        }
+    }
+
     var selectedDate by remember { mutableStateOf("") }
     var reason by remember { mutableStateOf("") }
     var termsAccepted by remember { mutableStateOf(false) }
@@ -159,13 +192,14 @@ fun RequestFormScreen(
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        // Item Name TextField
+        // Item Name TextField - now readonly since we're getting it from the ID
         Text(text = "Item Name:", fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(4.dp))
         OutlinedTextField(
             value = itemName,
-            onValueChange = { itemName = it },
-            placeholder = { Text("Search available item here") },
+            onValueChange = { /* Read-only field */ },
+            readOnly = true,
+            placeholder = { Text("Item name will appear here") },
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White, shape = RoundedCornerShape(12.dp)),
@@ -377,19 +411,44 @@ fun RequestFormScreen(
 
         Button(
             onClick = {
-                // Add request to ViewModel
                 if (termsAccepted) {
-                    val returnTime = parseTimeSlotToEnd(selectedStartTime, selectedDurationMinutes + 10)
-                    viewModel.addRequest(
-                        item = itemName,
-                        requestDate = selectedDate,
-                        status = "Pending",
-                        returnTime = returnTime
+                    val user = itemViewModel.userData.value
+                    val borrowerFullName =
+                        "${user?.firstName ?: "Unknown"} ${user?.lastName ?: ""}".trim()
+                    val borrowerEmail = user?.email ?: ""
+                    val formatter =
+                        java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+                    val currentTime = formatter.format(Date())
+
+                    viewModel.createRequestOnBackend(
+                        BorrowRequest(
+                            id = "REQ-${System.currentTimeMillis()}",
+                            itemId = itemId ?: "",  // Use actual itemId
+                            itemName = itemName,    // Use item name
+                            borrowerId = user?.uid ?: "",
+                            borrowerName = borrowerFullName,
+                            borrowerEmail = borrowerEmail,
+                            borrowDate = selectedDate,
+                            returnTime = parseTimeSlotToEnd(
+                                selectedStartTime,
+                                selectedDurationMinutes + 10
+                            ),
+                            status = "Pending",
+                            purpose = reason,
+                            timeRange = "$selectedStartTime - ${
+                                parseTimeSlotToEnd(
+                                    selectedStartTime,
+                                    selectedDurationMinutes
+                                )
+                            }",
+                            requestDate = currentTime,
+                            createdAt = currentTime
+                        )
                     )
+
                     showConfirmationDialog = true
                 }
-            },
-            enabled = termsAccepted,
+            }, enabled = termsAccepted && selectedDate.isNotEmpty() && selectedStartTime != null && selectedDurationLabel != null && reason.isNotBlank(),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCC6600)),
             modifier = Modifier
@@ -403,67 +462,67 @@ fun RequestFormScreen(
                 color = Color.White
             )
         }
-    }
 
-    // Confirmation Dialog
-    if (showConfirmationDialog) {
-        val returnTime = parseTimeSlotToEnd(selectedStartTime, selectedDurationMinutes + 10)
-        AlertDialog(
-            onDismissRequest = { showConfirmationDialog = false },
-            title = { Text("Confirm Request") },
-            text = {
-                Column {
-                    Text("Item Name: $itemName")
-                    Text("Date of Borrowing: $selectedDate")
-                    Text("Reason: $reason")
-                    Text("Selected Time Slot: ${selectedStartTime ?: "Not selected"}")
-                    Text("Duration: ${selectedDurationLabel ?: "Not selected"}")
-                    Text("Expected Return Time: $returnTime")
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showSuccessMessage = true
-                        showConfirmationDialog = false
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCC6600))
-                ) {
-                    Text("Confirm Request", color = Color.White)
-                }
-            },
-            dismissButton = {
-                OutlinedButton(
-                    onClick = { showConfirmationDialog = false },
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFCC6600))
-                ) {
-                    Text("Cancel")
-                }
-            },
-            containerColor = Color.White,
-            shape = RoundedCornerShape(12.dp)
-        )
-    }
+        // Confirmation Dialog
+        if (showConfirmationDialog) {
+            val returnTime = parseTimeSlotToEnd(selectedStartTime, selectedDurationMinutes + 10)
+            AlertDialog(
+                onDismissRequest = { showConfirmationDialog = false },
+                title = { Text("Confirm Request") },
+                text = {
+                    Column {
+                        Text("Item Name: $itemName")
+                        Text("Date of Borrowing: $selectedDate")
+                        Text("Reason: $reason")
+                        Text("Selected Time Slot: ${selectedStartTime ?: "Not selected"}")
+                        Text("Duration: ${selectedDurationLabel ?: "Not selected"}")
+                        Text("Expected Return Time: $returnTime")
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showSuccessMessage = true
+                            showConfirmationDialog = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCC6600))
+                    ) {
+                        Text("Confirm Request", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(
+                        onClick = { showConfirmationDialog = false },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFCC6600))
+                    ) {
+                        Text("Cancel")
+                    }
+                },
+                containerColor = Color.White,
+                shape = RoundedCornerShape(12.dp)
+            )
+        }
 
-    // Success Message
-    if (showSuccessMessage) {
-        AlertDialog(
-            onDismissRequest = { showSuccessMessage = false },
-            title = { Text("Request Submitted") },
-            text = { Text("Your request has been submitted successfully!") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        navController.popBackStack()
-                        showSuccessMessage = false
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCC6600))
-                ) {
-                    Text("Okay", color = Color.White)
-                }
-            },
-            containerColor = Color.White,
-            shape = RoundedCornerShape(12.dp)
-        )
+        // Success Message
+        if (showSuccessMessage) {
+            AlertDialog(
+                onDismissRequest = { showSuccessMessage = false },
+                title = { Text("Request Submitted") },
+                text = { Text("Your request has been submitted successfully!") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            navController.popBackStack()
+                            showSuccessMessage = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCC6600))
+                    ) {
+                        Text("Okay", color = Color.White)
+                    }
+                },
+                containerColor = Color.White,
+                shape = RoundedCornerShape(12.dp)
+            )
+        }
     }
 }

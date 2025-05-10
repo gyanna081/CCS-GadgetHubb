@@ -1,232 +1,171 @@
 package com.example.ccsgadgethub
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.ccsgadgethub.components.CommonBackButton
+import com.example.ccsgadgethub.viewmodel.ItemViewModel
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileScreen(navController: NavController) {
-    var firstName by remember { mutableStateOf(ProfileData.firstName) }
-    var lastName by remember { mutableStateOf(ProfileData.lastName) }
-    var course by remember { mutableStateOf(ProfileData.course) }
-    var yearLevel by remember { mutableStateOf(ProfileData.yearLevel) }
+fun EditProfileScreen(
+    navController: NavController,
+    itemViewModel: ItemViewModel = viewModel()
+) {
+    val user by itemViewModel.userData.collectAsState()
+    var firstName by remember { mutableStateOf(user?.firstName ?: "") }
+    var lastName by remember { mutableStateOf(user?.lastName ?: "") }
+    var course by remember { mutableStateOf(user?.course ?: "") }
+    var yearLevel by remember { mutableStateOf(user?.year ?: "") }
 
-    val courseOptions = listOf("BSIT", "BSCS", "BSEMC")
+    val courseOptions = listOf("BSIT", "BSCS")
     val yearOptions = listOf("1st Year", "2nd Year", "3rd Year", "4th Year")
-
     var courseDropdownExpanded by remember { mutableStateOf(false) }
     var yearDropdownExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFCF3E8))
-            .padding(horizontal = 16.dp)
+            .background(Color(0xFFFFF5E9))
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(WindowInsets.statusBars.asPaddingValues().calculateTopPadding()))
+        CommonBackButton(navController = navController)
 
-        // Top Bar
-        Row(
+        Text(
+            text = "Edit Profile",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFFCC6600)
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        OutlinedTextField(
+            value = firstName,
+            onValueChange = { firstName = it },
+            label = { Text("First Name") },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFDE6A00))
-                    .clickable { navController.popBackStack() },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+                .background(Color.White, RoundedCornerShape(12.dp))
+        )
 
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Logo",
-                modifier = Modifier.height(60.dp),
-                contentScale = ContentScale.Fit
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = lastName,
+            onValueChange = { lastName = it },
+            label = { Text("Last Name") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White, RoundedCornerShape(12.dp))
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ExposedDropdownMenuBox(
+            expanded = courseDropdownExpanded,
+            onExpandedChange = { courseDropdownExpanded = !courseDropdownExpanded }
+        ) {
+            OutlinedTextField(
+                readOnly = true,
+                value = course,
+                onValueChange = {},
+                label = { Text("Course") },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+                    .background(Color.White, RoundedCornerShape(12.dp))
             )
+            ExposedDropdownMenu(
+                expanded = courseDropdownExpanded,
+                onDismissRequest = { courseDropdownExpanded = false }
+            ) {
+                courseOptions.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(option) },
+                        onClick = {
+                            course = option
+                            courseDropdownExpanded = false
+                        }
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Form Card
-        Column(
+        ExposedDropdownMenuBox(
+            expanded = yearDropdownExpanded,
+            onExpandedChange = { yearDropdownExpanded = !yearDropdownExpanded }
+        ) {
+            OutlinedTextField(
+                readOnly = true,
+                value = yearLevel,
+                onValueChange = {},
+                label = { Text("Year Level") },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+                    .background(Color.White, RoundedCornerShape(12.dp))
+            )
+            ExposedDropdownMenu(
+                expanded = yearDropdownExpanded,
+                onDismissRequest = { yearDropdownExpanded = false }
+            ) {
+                yearOptions.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(option) },
+                        onClick = {
+                            yearLevel = option
+                            yearDropdownExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                val uid = FirebaseAuth.getInstance().currentUser?.uid
+                if (uid != null) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        itemViewModel.updateUserProfile(
+                            uid = uid,
+                            firstName = firstName,
+                            lastName = lastName,
+                            course = course,
+                            year = yearLevel
+                        )
+                    }
+                    navController.popBackStack()
+                }
+            },
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCC6600)),
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFF9ECD8), RoundedCornerShape(16.dp))
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .height(50.dp)
         ) {
-
-            // First Name
-            Text("First Name:", fontWeight = FontWeight.Bold)
-            OutlinedTextField(
-                value = firstName,
-                onValueChange = { firstName = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp, bottom = 12.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White
-                )
-            )
-
-            // Last Name
-            Text("Last Name:", fontWeight = FontWeight.Bold)
-            OutlinedTextField(
-                value = lastName,
-                onValueChange = { lastName = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp, bottom = 12.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White
-                )
-            )
-
-            // Static contact and email
-            Text("micaella.obeso@cit.edu", color = Color.Gray, fontSize = 14.sp)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Course
-            Text("Course/Program:", fontWeight = FontWeight.Bold)
-            ExposedDropdownMenuBox(
-                expanded = courseDropdownExpanded,
-                onExpandedChange = { courseDropdownExpanded = !courseDropdownExpanded }
-            ) {
-                OutlinedTextField(
-                    value = course,
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = courseDropdownExpanded) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
-                        .padding(top = 4.dp, bottom = 12.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White
-                    )
-                )
-                ExposedDropdownMenu(
-                    expanded = courseDropdownExpanded,
-                    onDismissRequest = { courseDropdownExpanded = false }
-                ) {
-                    courseOptions.forEach { selectionOption ->
-                        DropdownMenuItem(
-                            text = { Text(selectionOption) },
-                            onClick = {
-                                course = selectionOption
-                                courseDropdownExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            // Year Level
-            Text("Year Level:", fontWeight = FontWeight.Bold)
-            ExposedDropdownMenuBox(
-                expanded = yearDropdownExpanded,
-                onExpandedChange = { yearDropdownExpanded = !yearDropdownExpanded }
-            ) {
-                OutlinedTextField(
-                    value = yearLevel,
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = yearDropdownExpanded) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
-                        .padding(top = 4.dp, bottom = 12.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White
-                    )
-                )
-                ExposedDropdownMenu(
-                    expanded = yearDropdownExpanded,
-                    onDismissRequest = { yearDropdownExpanded = false }
-                ) {
-                    yearOptions.forEach { selectionOption ->
-                        DropdownMenuItem(
-                            text = { Text(selectionOption) },
-                            onClick = {
-                                yearLevel = selectionOption
-                                yearDropdownExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Save and Cancel Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(onClick = { navController.popBackStack() }) {
-                    Text("Cancel", color = Color(0xFFB71C1C))
-                }
-                Spacer(modifier = Modifier.width(24.dp))
-                Button(
-                    onClick = {
-                        // ✅ Save updated profile
-                        ProfileData.firstName = firstName
-                        ProfileData.lastName = lastName
-                        ProfileData.course = course
-                        ProfileData.yearLevel = yearLevel
-
-                        // ✅ Navigate back to ProfileScreen
-                        navController.navigate("profile") {
-                            popUpTo("dashboard") { inclusive = false }
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDE6A00)),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text("Save", color = Color.Black, fontWeight = FontWeight.Bold)
-                }
-            }
+            Text("Save", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
         }
     }
 }

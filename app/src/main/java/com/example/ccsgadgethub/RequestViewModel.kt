@@ -1,38 +1,70 @@
 package com.example.ccsgadgethub.viewmodel
 
-import androidx.compose.runtime.mutableStateListOf
+import android.util.Log
 import androidx.lifecycle.ViewModel
-
-data class RequestItem(
-    val id: Int,  // Added an ID to identify each request uniquely
-    val item: String,
-    val requestDate: String,
-    val status: String,
-    val returnTime: String
-)
+import androidx.lifecycle.viewModelScope
+import com.example.ccsgadgethub.BorrowRequest
+import com.example.ccsgadgethub.RetrofitClient
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class RequestViewModel : ViewModel() {
-    var requests = mutableStateListOf<RequestItem>()
-        private set
 
-    // Add a new request to the list
-    fun addRequest(item: String, requestDate: String, status: String, returnTime: String) {
-        val newId = requests.size + 1  // Simple ID generation
-        requests.add(RequestItem(newId, item, requestDate, status, returnTime))
+    private val _requests = MutableStateFlow<List<BorrowRequest>>(emptyList())
+    val requests: StateFlow<List<BorrowRequest>> = _requests.asStateFlow()
+
+    // Add initialization to fetch requests when the ViewModel is created
+    init {
+        fetchRequests()
     }
 
-    // Function to confirm a request (change its status)
-    fun confirmRequest(requestId: Int) {
-        // Modify the request status to "Confirmed" for the given ID
-        val updatedRequests = requests.map {
-            if (it.id == requestId) {
-                it.copy(status = "Confirmed")  // Update status to "Confirmed"
-            } else {
-                it
+    fun fetchRequests() {
+        viewModelScope.launch {
+            try {
+                val result = RetrofitClient.api.getAllRequests()
+                _requests.value = result
+                Log.d("RequestViewModel", "Fetched ${result.size} requests")
+            } catch (e: Exception) {
+                Log.e("RequestViewModel", "Error fetching requests", e)
+                // Keep the list as is or set to empty depending on your preference
+                // _requests.value = emptyList()
             }
         }
-        // Assign the updated list back to `requests`
-        requests.clear()
-        requests.addAll(updatedRequests)
+    }
+
+    fun createRequestOnBackend(request: BorrowRequest) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.api.createRequest(request)
+                if (response.isSuccessful) {
+                    Log.d("RequestViewModel", "Successfully created request")
+                    fetchRequests() // Refresh the list
+                } else {
+                    Log.e("RequestViewModel", "Failed to create request: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("RequestViewModel", "Error creating request", e)
+            }
+        }
+    }
+
+    // Add the missing updateRequest method that's used in RequestSummary.kt
+    fun updateRequest(requestId: String, updateData: Map<String, String>) {
+        viewModelScope.launch {
+            try {
+                Log.d("RequestViewModel", "Updating request $requestId with data: $updateData")
+                val response = RetrofitClient.api.updateRequestStatus(requestId, updateData)
+                if (response.isSuccessful) {
+                    Log.d("RequestViewModel", "Successfully updated request")
+                    fetchRequests() // Refresh the list
+                } else {
+                    Log.e("RequestViewModel", "Failed to update request: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("RequestViewModel", "Error updating request", e)
+            }
+        }
     }
 }

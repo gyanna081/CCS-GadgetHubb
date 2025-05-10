@@ -1,5 +1,7 @@
 [versions]
 agp = "8.9.2"
+converterGson = "2.9.0"
+firebaseAuthKtx = "23.2.0"
 kotlin = "2.0.21"
 coreKtx = "1.10.1"
 junit4 = "4.13.2"            # ✅ Corrected (was wrong before)
@@ -8,10 +10,14 @@ espressoCore = "3.5.1"
 lifecycleRuntimeKtx = "2.6.1"
 activityCompose = "1.8.0"
 composeBom = "2024.09.00"
+loggingInterceptor = "4.9.3"
 navigationCompose = "2.7.5"
+playServicesAuth = "21.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit4" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitExt" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -30,6 +36,9 @@ androidx-material-icons-extended = { group = "androidx.compose.material", name =
 
 # ✅ New addition for Coil (to fix your upload image error)
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version = "2.4.0" }
+logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "converterGson" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

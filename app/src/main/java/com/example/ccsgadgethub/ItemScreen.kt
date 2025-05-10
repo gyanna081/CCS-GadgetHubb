@@ -1,67 +1,74 @@
 package com.example.ccsgadgethub
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.*
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import coil.compose.AsyncImage
+import com.example.ccsgadgethub.viewmodel.ItemViewModel
+import kotlinx.coroutines.launch
+import android.util.Log
 
-// Dummy items list
-data class Item(val name: String, val status: String, val rating: Int)
-
-val allItems = listOf(
-    Item("Dell Laptop", "Available", 5),
-    Item("Huawei D15 Matebook", "Borrowed", 4),
-    Item("Dell Laptop 2", "Available", 3),
-    Item("Asus Zenbook", "Available", 5),
-    Item("MacBook Air", "Borrowed", 5)
-)
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemScreen(navController: NavController) {
+fun ItemScreen(navController: NavController, viewModel: ItemViewModel) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val coroutineScope = rememberCoroutineScope()
+
     var searchQuery by remember { mutableStateOf("") }
     var selectedStatus by remember { mutableStateOf("All") }
-    var selectedRating by remember { mutableStateOf("All") }
-
     val statuses = listOf("All", "Available", "Borrowed")
-    val ratings = listOf("All", "★", "★★", "★★★", "★★★★", "★★★★★")
 
-    val filteredItems = allItems.filter { item ->
-        (selectedStatus == "All" || item.status == selectedStatus) &&
-                (selectedRating == "All" || item.rating == selectedRating.length)
+    val items by viewModel.items.collectAsState()
+
+    // Fetch items on first launch
+    LaunchedEffect(Unit) {
+        viewModel.fetchItems()
+    }
+
+    // Observe lifecycle to refetch items on resume
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                coroutineScope.launch { viewModel.fetchItems() }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    val filteredItems = items.filter {
+        (selectedStatus == "All" || it.status == selectedStatus) &&
+                it.name.contains(searchQuery, ignoreCase = true)
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFCF3E8))
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(WindowInsets.statusBars.asPaddingValues().calculateTopPadding()))
 
-        // Top Bar
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -74,7 +81,7 @@ fun ItemScreen(navController: NavController) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = Color.White,
                     modifier = Modifier.size(20.dp)
@@ -91,7 +98,6 @@ fun ItemScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Search Field
         TextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
@@ -111,7 +117,6 @@ fun ItemScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Filters
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -126,25 +131,11 @@ fun ItemScreen(navController: NavController) {
                     textColor = Color(0xFFDE6A00)
                 )
             }
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Ratings:", fontWeight = FontWeight.Bold)
-                DropdownMenuBox(
-                    selectedText = selectedRating,
-                    items = ratings,
-                    onItemSelected = { selectedRating = it },
-                    backgroundColor = Color.White,
-                    textColor = Color(0xFFFFA000)
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Items List
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (filteredItems.isEmpty()) {
                 Text(
                     text = "No items found.",
@@ -155,50 +146,39 @@ fun ItemScreen(navController: NavController) {
                 )
             } else {
                 filteredItems.forEach { item ->
-                    val encodedItemName = URLEncoder.encode(item.name, StandardCharsets.UTF_8.toString())
+                    // Log item details to help debug
+                    Log.d("ItemScreen", "Item: ${item.name}, ID: ${item.id}")
 
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(Color.White, RoundedCornerShape(12.dp))
                             .clickable {
-                                navController.navigate("item_detail/$encodedItemName")
+                                // Use item.id instead of item.name for navigation
+                                navController.navigate("item_detail/${item.id}")
                             }
                             .padding(vertical = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Box(
+                        AsyncImage(
+                            model = item.imageUrl,
+                            contentDescription = "Item Image",
                             modifier = Modifier
                                 .size(60.dp)
-                                .background(Color.LightGray, RoundedCornerShape(8.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "Image", fontSize = 10.sp, color = Color.DarkGray)
-                        }
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
 
                         Spacer(modifier = Modifier.height(8.dp))
-
                         Text(item.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-
                         Spacer(modifier = Modifier.height(4.dp))
-
                         Text(
                             text = item.status,
                             color = if (item.status == "Available") Color(0xFF2E7D32) else Color(0xFFC62828),
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp
                         )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        Text(
-                            text = "★".repeat(item.rating),
-                            color = Color(0xFFFFA000),
-                            fontSize = 18.sp
-                        )
-
                         Spacer(modifier = Modifier.height(8.dp))
-
                         Text(
                             text = "View Details",
                             color = Color(0xFFD35400),
